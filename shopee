@@ -1,0 +1,758 @@
+{
+  "updatedAt": "2026-01-07T04:12:01.000Z",
+  "createdAt": "2025-12-01T07:08:04.222Z",
+  "id": "037oeU0xxB2nPCMT",
+  "name": "SHOPEE",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a74b3118-d2f8-45fa-9986-b7a2960c9dd3",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \"((\" + $('Config variable for regex1').item.json.monthShortName.toLowerCase() + \"|\" + $('Config variable for regex1').item.json.monthName.toLowerCase() + \")[\\\\w\\\\s.-]*)\" +$('Config variable for regex1').item.json.year   }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "32cc8ee7-a407-4bbe-951b-406acddc1404",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \".*\" + $('Config Folder & Brand1').item.json.brandName.toLowerCase() + \".*\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "049d338f-cb58-4c04-b7e4-760ec5ddd004",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \".*\" + \"shopee\".toLowerCase() + \".*\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -928,
+        208
+      ],
+      "id": "4ecf5d5b-41bf-4ef4-86c4-b92201601f6b",
+      "name": "Filterfiles_Shopee1",
+      "alwaysOutputData": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0a6fd955-432c-4927-a125-d21c59d0724b",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -704,
+        208
+      ],
+      "id": "432934ba-1d39-4b7e-a8f3-2bdd308e6c23",
+      "name": "If have file3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const requiredColumns = [\n      'หมายเลขคำสั่งซื้อ',\n      'สถานะการสั่งซื้อ',\n      'สถานะการคืนเงินหรือคืนสินค้า',\n      'เลขอ้างอิง SKU (SKU Reference No.)',\n      'ชื่อสินค้า',\n      'ช่องทางการชำระเงิน',\n      'จำนวน', \n      'จำนวนที่ส่งคืน',\n      'ราคาตั้งต้น',\n      'ราคาขายสุทธิ', \n      'โค้ดส่วนลดชำระโดยผู้ขาย',\n      'วันที่ทำการสั่งซื้อ',\n      'เวลาส่งสินค้า'\n]\n\n// รับข้อมูล Input\nconst items = $input.all();\nconst returnData = [];\n\n// กำหนดชื่อ Platform ตายตัวสำหรับ Node นี้\nconst currentPlatform = 'Shopee';\n\n// 🛡️ PART 1: VALIDATION CHECK\n// เช็คว่ามีข้อมูลไหม\nif (!items.length || !items[0].json) {\n  // แทนที่จะ throw เรา return ค่า Error ออกไปตรงๆ\n  return [{\n    json: {\n      error: true,\n      errorMessage: `⚠️ [${currentPlatform}] ไม่พบข้อมูล Input (Empty Dataset)`\n    }\n  }];\n}\n\nconst firstRow = items[0].json;\nconst actualKeys = Object.keys(firstRow).map(k => k.trim().toLowerCase());\n\n// หาคอลัมน์ที่หาย\nconst missingColumns = requiredColumns.filter(reqCol => {\n  return !actualKeys.includes(reqCol.toLowerCase());\n});\n\n// 🚨 ถ้าเจอคอลัมน์หาย\nif (missingColumns.length > 0) {\n  const missingList = missingColumns.join(', ');\n  // ส่งออกไปบอก Node ถัดไปว่า \"ฉันพังนะ\" พร้อมข้อความเต็มๆ\n  return [{\n    json: {\n      error: true,\n      errorMessage: `⚠️ [${currentPlatform}] ข้อมูลไม่ครบ! ขาดคอลัมน์: ${missingList}`\n    }\n  }];\n}\n\n// ⚙️ PART 2: TRANSFORMATION\nfor (const item of items) {\n  const row = item.json; \n  \n  // Helper Function\n  const get = (colName) => {\n    if (!colName) return null;\n    const key = Object.keys(row).find(k => k.trim().toLowerCase() === colName.trim().toLowerCase());\n    return key ? row[key] : null;\n  };\n\n  // Logic การแปลงข้อมูลเฉพาะของ SHOPEE\n  const originalPrice = parseFloat(get('ราคาตั้งต้น')) || 0;\n  const netPrice = parseFloat(get('ราคาขายสุทธิ')) || 0;\n   \n  const finalRow = {\n      \"Platform name\": currentPlatform,\n      \"Order ID\": get('หมายเลขคำสั่งซื้อ'),\n      \"Order status\": get('สถานะการสั่งซื้อ'),\n      \"Cancelation/Return Type\": get('สถานะการคืนเงินหรือคืนสินค้า'),\n      \"Seller SKU\": get('เลขอ้างอิง SKU (SKU Reference No.)'),\n      \"Product Name\": get('ชื่อสินค้า'),\n      \"Payment Method\": get('ช่องทางการชำระเงิน'),\n      \"Quantity\": parseInt(get('จำนวน')) || 0, \n      \"Quantity of return\": get('จำนวนที่ส่งคืน'),\n      \"SKU Unit Original Price\": originalPrice,\n      \"SKU Subtotal Before Discount\": netPrice,\n      \"SKU Subtotal After Discount\": null,\n      \"Direct Discount\": originalPrice - netPrice, \n      \"Voucher Discount\": get('โค้ดส่วนลดชำระโดยผู้ขาย'),\n      \"Created Time\": get('วันที่ทำการสั่งซื้อ'),\n      \"Delivered Time\": get('เวลาส่งสินค้า')\n  };\n\n  // Push ข้อมูล\n  returnData.push({ json: finalRow });\n}\n\nreturn returnData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        16,
+        192
+      ],
+      "id": "db08c933-544a-46fd-bd4b-cb0b0e92dd59",
+      "name": "Data transformation SH1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "fileFolder",
+        "queryString": "=",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $('Config Folder & Brand1').item.json.folder_Shopee }}",
+            "mode": "id"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1152,
+        208
+      ],
+      "id": "6246e44c-2dd3-4848-873e-a94d654bd08d",
+      "name": "Search files and folders SHOPEE1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "credentials": {
+        "googleApi": {
+          "id": "1w4Q3todiZw4BNKd",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": false
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        448,
+        176
+      ],
+      "id": "6db8cee6-5c70-4035-b231-94bcc6a799b5",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "command": "echo >> /home/node/final_report.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        896,
+        176
+      ],
+      "id": "bdc0655e-93ec-464e-9050-355be76bc30f",
+      "name": "enter new line"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1728,
+        208
+      ],
+      "id": "796ec77e-9d27-4a4d-8196-ec0ead009cc9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "batchSize": 2000,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -208,
+        176
+      ],
+      "id": "9c42a876-d8e0-4933-bb31-8e01399227fc",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\n\nconst date = new Date();\n// ถอยหลังไป 1 เดือน (วันสุดท้ายของเดือนที่แล้ว)\ndate.setDate(0); \n\nconst monthNames = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\",\n  \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"\n];\nconst monthShortNames = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\",\n  \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"\n];\n\nreturn {\n  year: date.getFullYear().toString(),\n  monthNumber: ('0' + (date.getMonth() + 1)).slice(-2),\n  monthName: monthNames[date.getMonth()],\n  monthShortName: monthShortNames[date.getMonth()]\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1344,
+        208
+      ],
+      "id": "62d7aadb-8d9c-4ec9-b318-50ffd3071cbd",
+      "name": "Config variable for regex1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "104447ca-270c-4c63-8ac3-31120cc42ce6",
+              "name": "=brandName",
+              "value": "={{ $json.body.brand_name }}",
+              "type": "string"
+            },
+            {
+              "id": "70f67873-a248-4266-8faf-4419677925c1",
+              "name": "folder_Shopee",
+              "value": "18h85AfnPI_NhUzqwcMIH8Xw3rLV43Vzv",
+              "type": "string"
+            },
+            {
+              "id": "5ed80f42-ebc6-41d6-be6e-29448772e4a3",
+              "name": "folder_Archive",
+              "value": "13iVrXbXVcvAE6cAGU1enFAarUih5L8Ar",
+              "type": "string"
+            },
+            {
+              "id": "09b26435-9769-44cb-b437-39fa5f88e95e",
+              "name": "folder_final_reports",
+              "value": "1f5B2RL2a9QnEFCK0GkMD8zTOlWYh5cRd",
+              "type": "string"
+            },
+            {
+              "id": "43e2d48c-c0cd-42f1-b4dc-c0dd0136506b",
+              "name": "parent_drive",
+              "value": "1TYSAJPuU9njhxnzFCilbxCkDt4f90k7X",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1568,
+        208
+      ],
+      "id": "3eaf2eaf-ae6f-4e1c-9523-93fc99484a7a",
+      "name": "Config Folder & Brand1"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {
+          "includeEmptyCells": true
+        }
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        832
+      ],
+      "id": "05efae0e-a36e-49b4-95f7-a05508a8a2ba",
+      "name": "Extract from File Shopee1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -464,
+        576
+      ],
+      "id": "9f4a121c-09ab-4da6-8c01-daaea929a880",
+      "name": "Download file Shopee",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "notesInFlow": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "googleApi": {
+          "id": "1w4Q3todiZw4BNKd",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -464,
+        192
+      ],
+      "id": "b1a72408-96a5-4f35-8852-603bdfa3a4bb",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQA4vVH8yY/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=mDogCDO_DXBkboDcHu6YLs8nds4F589Y7-Gh6mwsNNI",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=🚨{{ $('Config Folder & Brand1').first().json.brandName }}\nแจ้งเตือนไฟล์ผิดพลาด\n{{ $json.errorMessage }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        240,
+        448
+      ],
+      "id": "859cc454-6404-446d-b1ab-35a009422284",
+      "name": "Notify",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c932f70b-0b82-4dfb-9d07-0eb55929e788",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        192
+      ],
+      "id": "761d7d39-9020-4c47-8652-78039aa58959",
+      "name": "If not error"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst allFiles = $('Filterfiles_Shopee1').all().map(item => item.json);\n\nreturn allFiles.map(file => {\n  return {\n    json: {\n      fileId: file.id\n    }\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b695f402-dc4e-44d0-8201-a342ac1a1f0e",
+      "name": "Extract fileID",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// ส่งสัญญาณบอกตัวแม่ว่า \"จัดการแล้วจ้า\"\nreturn [{\n    json: {\n        errorHandled: true\n    }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        656
+      ],
+      "id": "9807c36c-f285-4ca6-8d46-d6d0eee1e382",
+      "name": "error to main"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/final_report.csv",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        672,
+        176
+      ],
+      "id": "9fdddd40-d64c-49db-8bd0-bc78b870ea8f",
+      "name": "Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1b71cf16-409e-4132-8461-57ccdc42fd90",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": false,
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -448,
+        1280
+      ],
+      "id": "511a73bd-750d-404a-8c96-b3e390b0c590",
+      "name": "error"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQA4vVH8yY/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=mDogCDO_DXBkboDcHu6YLs8nds4F589Y7-Gh6mwsNNI",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=🚨{{ $('Config Folder & Brand1').first().json.brandName }}\nแจ้งเตือนไฟล์ผิดพลาด\n{{ $json.errorMessage }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -208,
+        1296
+      ],
+      "id": "eb464ef9-2871-42c6-8649-bd02dfb5a917",
+      "name": "Notify1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// ================= CONFIGURATION =================\nconst currentPlatform = 'Shopee'; // เปลี่ยนเป็น Shopee, Tiktok ตาม Workflow\n\n// ใส่รายชื่อ Header ที่ \"คาดหวังว่าจะเจอ\" (ต้นฉบับที่ถูกต้อง)\nconst expectedColumns = [\n  'orderItemId',\n  'orderType',\n  'Guarantee',\t\n  'deliveryType',\t\n  'lazadaId',\t\n  'sellerSku',\t\n  'lazadaSku',\n  'wareHouse',\t\n  'createTime',\t\n  'updateTime',\n  'rtsSla',\t\n  'ttsSla',\n  'orderNumber',\n  'invoiceRequired',\n  'invoiceNumber',\t\n  'deliveredDate',\n  'customerName',\t\n  'customerEmail',\t\n  'nationalRegistrationNumber',\t\n  'shippingName',\t\n  'shippingAddress',\t\n  'shippingAddress2',\t\n  'shippingAddress3',\t\n  'shippingAddress4',\t\n  'shippingAddress5',\t\n  'shippingPhone',\t\n  'shippingPhone2',\n  'shippingCity',\t\n  'shippingPostCode',\t\n  'shippingCountry',\t\n  'shippingRegion',\t\n  'billingName',\n  'billingAddr',\t\n  'billingAddr2',\t\n  'billingAddr3',\t\n  'billingAddr4',\t\n  'billingAddr5',\t\n  'billingPhone',\t\n  'billingPhone2',\t\n  'billingCity',\t\n  'billingPostCode',\t\n  'billingCountry',\t\n  'taxCode',\t\n  'branchNumber',\t\n  'taxInvoiceRequested',\t\n  'payMethod',\t\n  'paidPrice',\t\n  'unitPrice',\t\n  'sellerDiscountTotal',\t\n  'shippingFee',\n  'walletCredit',\t\n  'itemName',\t\n  'variation',\t\n  'cdShippingProvider',\t\n  'shippingProvider',\t\n  'shipmentTypeName',\t\n  'shippingProviderType',\t\n  'cdTrackingCode',\t\n  'trackingCode',\t\n  'trackingUrl',\t\n  'shippingProviderFM',\t\n  'trackingCodeFM',\t\n  'trackingUrlFM',\t\n  'promisedShippingTime',\t\n  'premium',\t\n  'status',\t\n  'buyerFailedDeliveryReturnInitiator',\n  'buyerFailedDeliveryReason',\t\n  'buyerFailedDeliveryDetail',\t\n  'buyerFailedDeliveryUserName',\t\n  'bundleId',\t\n  'semiManaged',\t\n  'flexibleDeliveryTime',\t\n  'bundleDiscount',\t\n  'refundAmount',\n  // 'sellerNote'\n\n];\n// =================================================\nconst items = $input.all();\n\n// ฟังก์ชันตรวจสอบ\nfunction getValidationError(json) {\n  if (!json) return null;\n  const actualHeadersRaw = Object.keys(json);\n  const actualHeadersNorm = actualHeadersRaw.map(k => k.trim().toLowerCase());\n  const expectedHeadersNorm = expectedColumns.map(k => k.trim().toLowerCase());\n\n  const missingColumns = expectedColumns.filter(reqCol => {\n    return !actualHeadersNorm.includes(reqCol.trim().toLowerCase());\n  });\n\n  const extraColumns = actualHeadersRaw.filter(actCol => {\n    return !expectedHeadersNorm.includes(actCol.trim().toLowerCase());\n  });\n\n  const countDiff = actualHeadersRaw.length - expectedColumns.length;\n\n  if (missingColumns.length > 0 || extraColumns.length > 0 || countDiff !== 0) {\n    let errorDetails = [];\n    if (countDiff !== 0) errorDetails.push(`🔢 จำนวน: ${actualHeadersRaw.length} (คาดหวัง ${expectedColumns.length})`);\n    if (missingColumns.length > 0) errorDetails.push(`❌ หาย: ${missingColumns.join(', ')}`);\n    if (extraColumns.length > 0) errorDetails.push(`🆕 เกิน: ${extraColumns.join(', ')}`);\n\n    return `⚠️ [${currentPlatform}] โครงสร้างเปลี่ยน!\\n` + errorDetails.join('\\n');\n  }\n  return null;\n}\n\n// ================= MAIN LOGIC =================\n\n// 1. เช็คข้อมูล Input\nif (!items.length || !items[0].json) {\n   // กรณีไม่มีข้อมูลเลย ให้สร้าง item ปลอมๆ ขึ้นมาเพื่อส่ง error ออกไป\n   return [{\n     json: { error: true, errorMessage: `⚠️ [${currentPlatform}] ไม่พบข้อมูล Input` }\n   }];\n}\n\n// 2. ตรวจสอบจาก item แรก (ตัวแทนหมู่บ้าน)\nconst errorMsg = getValidationError(items[0].json);\n\n// 3. ถ้าเจอ Error -> \"แปะป้าย\" Error ลงไปในข้อมูลทุกตัว แต่ส่งข้อมูลเดิมกลับไป\nif (errorMsg) {\n  return items.map(item => {\n    // เก็บข้อมูลเดิมไว้ครบถ้วน\n    return {\n      json: {\n        ...item.json,       // ข้อมูล Transaction เดิม (Order ID, Price, ฯลฯ)\n        error: true,        // 🚩 ธงแดง\n        errorMessage: errorMsg // ข้อความแจ้งเตือน\n      }\n    };\n  });\n}\n\n// 4. ถ้าปกติ -> ส่งข้อมูลเดิมออกไปเลย (ทางผ่าน)\nreturn items;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -464,
+        1056
+      ],
+      "id": "bd04de4a-ba47-4656-9efe-3206b44dd062",
+      "name": "validate header"
+    }
+  ],
+  "connections": {
+    "Filterfiles_Shopee1": {
+      "main": [
+        [
+          {
+            "node": "If have file3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If have file3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data transformation SH1": {
+      "main": [
+        [
+          {
+            "node": "If not error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders SHOPEE1": {
+      "main": [
+        [
+          {
+            "node": "Filterfiles_Shopee1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Config Folder & Brand1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Extract fileID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Data transformation SH1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enter new line": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Folder & Brand1": {
+      "main": [
+        [
+          {
+            "node": "Config variable for regex1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config variable for regex1": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders SHOPEE1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File Shopee1": {
+      "main": [
+        [
+          {
+            "node": "validate header",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file Shopee": {
+      "main": [
+        [
+          {
+            "node": "Extract from File Shopee1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download file Shopee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If not error": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify": {
+      "main": [
+        [
+          {
+            "node": "error to main",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "enter new line",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "error": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Notify1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "validate header": {
+      "main": [
+        [
+          {
+            "node": "error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify1": {
+      "main": [
+        [
+          {
+            "node": "Extract fileID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2c182014-43cb-4345-a687-3d8866761f3a",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-01T07:08:04.224Z",
+      "createdAt": "2025-12-01T07:08:04.224Z",
+      "role": "workflow:owner",
+      "workflowId": "037oeU0xxB2nPCMT",
+      "projectId": "wgOKw36KVCTZkEHc"
+    }
+  ],
+  "tags": []
+}
