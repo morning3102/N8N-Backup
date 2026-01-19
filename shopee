@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-01-07T04:12:01.000Z",
+  "updatedAt": "2026-01-19T06:28:34.000Z",
   "createdAt": "2025-12-01T07:08:04.222Z",
   "id": "037oeU0xxB2nPCMT",
   "name": "SHOPEE",
@@ -489,6 +489,17 @@
       ],
       "id": "bd04de4a-ba47-4656-9efe-3206b44dd062",
       "name": "validate header"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        240,
+        0
+      ],
+      "id": "3cf8ae56-3c66-48d9-8d3e-81d2164d010b",
+      "name": "Merge"
     }
   ],
   "connections": {
@@ -733,6 +744,17 @@
           }
         ]
       ]
+    },
+    "Extract fileID": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -743,7 +765,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "2c182014-43cb-4345-a687-3d8866761f3a",
+  "versionId": "b88922be-7fd9-4fd3-83db-b7cf09d2e8e7",
   "triggerCount": 0,
   "shared": [
     {
