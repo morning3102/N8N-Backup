@@ -1,0 +1,2616 @@
+{
+  "updatedAt": "2025-12-01T07:06:57.000Z",
+  "createdAt": "2025-12-01T07:06:36.808Z",
+  "id": "0t0leWgWJwHEKEtq",
+  "name": "TIKTOK",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "4d01cfa0-071e-494a-9992-5b577b30803c",
+      "name": "Loop Over Items",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 15,
+              "triggerAtMinute": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e7f271f8-6c7d-4a6c-8a6b-2a74fdac5c85",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "AECjWe61RG39VDHa",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/AECjWe61RG39VDHa",
+          "cachedResultName": "[REIM]sub_workflow disk to csv"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        96
+      ],
+      "id": "ac5f821e-443f-40d5-b4b9-9b897ea30c77",
+      "name": "Call '[REIM]sub_workflow disk to csv'",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n// กำหนดรายชื่อแบรนด์ทั้งหมดที่นี่\nreturn [\n  {\n    json: {\n      brandName: \"Suntory\"\n    }\n  },\n  {\n    json: {\n      brandName: \"Lancome\"\n    }\n  },\n  {\n    json: {\n      brandName: \"Omron\"\n    }\n  },\n  {\n    json: {\n      brandName: \"Yvesrocher\"\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ec767afb-f28b-4231-8cda-d74afb749976",
+      "name": "Config brand"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -3072,
+        -256
+      ],
+      "id": "3ca38ad9-fe43-422b-a270-58daa0f98fb8",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -3136,
+        384
+      ],
+      "id": "d62614e7-dcaa-47b1-8823-f59203a87575",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $json.folder_Archive }}",
+            "mode": "id"
+          },
+          "whatToSearch": "folders"
+        },
+        "options": {
+          "fields": [
+            "name",
+            "id"
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -352,
+        -240
+      ],
+      "id": "558f439c-c22e-4a9c-bd44-270e0a76c698",
+      "name": "Search files and folders in folder_Archive1",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "327937d7-b78e-4d1a-aeb0-53489711f55b",
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "={{ $('link config').item.json.monthShortName }}{{ \"_\" }}{{ $('link config').item.json.year }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -128,
+        -240
+      ],
+      "id": "1f117b8f-1076-48e8-bff9-b43f54323b6b",
+      "name": "If have folder month1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "folder",
+        "name": "={{ $('link config').item.json.monthShortName }}{{ \"_\" }}{{ $('link config').item.json.year }}",
+        "driveId": {
+          "__rl": true,
+          "value": "={{ $('link config').item.json.parent_drive }}",
+          "mode": "id"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('link config').item.json.folder_Archive }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        96,
+        -144
+      ],
+      "id": "3f879f02-ed4b-456e-bb0c-77d69a734645",
+      "name": "Create folder month1",
+      "executeOnce": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "J0xLhfkzieqVmHhU",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/J0xLhfkzieqVmHhU",
+          "cachedResultName": "TIKTOK"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -2352,
+        -256
+      ],
+      "id": "823f5168-b3ca-481c-8330-f7b670a1acfc",
+      "name": "TIKTOK",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "mPoSGBIj5BUpiB4w",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/mPoSGBIj5BUpiB4w",
+          "cachedResultName": "LAZADA"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -2352,
+        -96
+      ],
+      "id": "4852efec-f8db-4704-bd95-46dd6068eac2",
+      "name": "LAZADA",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "H0zCgKm75QVWBlJj",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/H0zCgKm75QVWBlJj",
+          "cachedResultName": "SHOPEE"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        -2352,
+        -384
+      ],
+      "id": "8b80b8e5-facb-46a1-a6f6-a420f6a8cb62",
+      "name": "SHOPEE",
+      "executeOnce": true,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "104447ca-270c-4c63-8ac3-31120cc42ce6",
+              "name": "=brandName",
+              "value": "={{ $json.brandName }}",
+              "type": "string"
+            },
+            {
+              "id": "97ae91e5-545c-4a51-b522-1feb5d4f1b21",
+              "name": "folder_Lazada",
+              "value": "1bE7f_Qozkl7OSH6TE_1Ju3ct4hSFlfCL",
+              "type": "string"
+            },
+            {
+              "id": "70f67873-a248-4266-8faf-4419677925c1",
+              "name": "folder_Shopee",
+              "value": "18h85AfnPI_NhUzqwcMIH8Xw3rLV43Vzv",
+              "type": "string"
+            },
+            {
+              "id": "e181c646-0c79-419e-8f41-0f225372af29",
+              "name": "folder_Tiktok",
+              "value": "1YpZma9UWCw4k-umB09Z2x3S1bb0y2JFM",
+              "type": "string"
+            },
+            {
+              "id": "5ed80f42-ebc6-41d6-be6e-29448772e4a3",
+              "name": "folder_Archive",
+              "value": "13iVrXbXVcvAE6cAGU1enFAarUih5L8Ar",
+              "type": "string"
+            },
+            {
+              "id": "09b26435-9769-44cb-b437-39fa5f88e95e",
+              "name": "=folder_final_reports",
+              "value": "1f5B2RL2a9QnEFCK0GkMD8zTOlWYh5cRd",
+              "type": "string"
+            },
+            {
+              "id": "43e2d48c-c0cd-42f1-b4dc-c0dd0136506b",
+              "name": "parent_drive",
+              "value": "1TYSAJPuU9njhxnzFCilbxCkDt4f90k7X",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1712,
+        208
+      ],
+      "id": "818ba417-9cd2-4528-b447-f401b1f6d4e5",
+      "name": "Config Folder & Brand1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\n\nconst date = new Date();\n// ถอยหลังไป 1 เดือน (วันสุดท้ายของเดือนที่แล้ว)\ndate.setDate(0); \n\nconst monthNames = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\",\n  \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"\n];\nconst monthShortNames = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\",\n  \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"\n];\n\nreturn {\n  year: date.getFullYear().toString(),\n  monthNumber: ('0' + (date.getMonth() + 1)).slice(-2),\n  monthName: monthNames[date.getMonth()],\n  monthShortName: monthShortNames[date.getMonth()]\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1728,
+        352
+      ],
+      "id": "73898384-deea-4400-be27-5a245c475663",
+      "name": "Config variable for regex1"
+    },
+    {
+      "parameters": {
+        "command": "rm -f /home/node/*.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -2928,
+        -16
+      ],
+      "id": "e9e2bfe4-0130-42f0-8c1a-44bb9950d3b9",
+      "name": "Clean Start"
+    },
+    {
+      "parameters": {
+        "command": "echo -e \"\\xEF\\xBB\\xBFPlatform name,Order ID,Order status,Cancelation/Return Type,Seller SKU,Product Name,Payment Method,Quantity,Quantity of return,SKU Unit Original Price,SKU Subtotal Before Discount,SKU Subtotal After Discount,Direct Discount,Voucher Discount,Created Time,Delivered Time\">/home/node/final_report.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -2928,
+        -528
+      ],
+      "id": "ee59c449-f432-4923-aea8-60b1223ff315",
+      "name": "Create final report"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -2064,
+        -240
+      ],
+      "id": "74c164ee-81d6-4842-b2e9-daadf49f93de",
+      "name": "Merge output fileId"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/home/node/final_report.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1584,
+        -224
+      ],
+      "id": "8084581b-83a9-467e-96cc-4ad7496eb71f",
+      "name": "Read File final_report from Disk3",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1024,
+        -240
+      ],
+      "id": "9c9c531a-d27a-4106-811e-2541969c30b5",
+      "name": "Combine file & config",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "name": "={{ $json.brandName }}{{ '_report_' }}{{ $json.year }}{{ '-' }}{{ $json.monthNumber }}",
+        "driveId": {
+          "__rl": true,
+          "value": "={{ $json.parent_drive }}",
+          "mode": "id"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $json.folder_final_reports }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -800,
+        -240
+      ],
+      "id": "29dd29f0-d4db-49f0-bcfc-1d1034f58470",
+      "name": "Upload final_report to destination",
+      "executeOnce": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "command": "rm -f /home/node/*.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        -240
+      ],
+      "id": "b8624ecb-09c1-404c-9dbd-f8b31ab40fcd",
+      "name": "Clear files in disk"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -480,
+        176
+      ],
+      "id": "6469bdbd-38be-41c8-8c30-5fd3d055a8a8",
+      "name": "link config"
+    },
+    {
+      "parameters": {
+        "jsCode": "// ดึงข้อมูลมาจาก Merge2\nconst allFiles = $('Merge output fileId').all().map(item => item.json);\n\n// *** ขั้นตอนสำคัญ: กรองเอาเฉพาะที่มี fileId เท่านั้น ***\n// แก้จาก file.id เป็น file.fileId ให้ตรงกับข้อมูลต้นทาง\nconst validFiles = allFiles.filter(file => file.fileId && file.fileId !== undefined);\n\n// ส่งข้อมูลที่ถูกต้องกลับออกไป\n// แก้จาก return allFiles เป็น return validFiles (ส่งตัวที่กรองแล้วออกไป)\nreturn validFiles.map(file => {\n  return {\n    json: {\n      // แก้จาก file.id เป็น file.fileId\n      fileId: file.fileId \n    }\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        -336
+      ],
+      "id": "f5d55628-7d3b-49b7-9fd8-4f239e953695",
+      "name": "Extract fileId in all platform",
+      "alwaysOutputData": true,
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// ดึงข้อมูลมาจาก Merge2\nconst allFiles = $('Merge output fileId').all().map(item => item.json);\n\n// *** ขั้นตอนสำคัญ: กรองเอาเฉพาะที่มี fileId เท่านั้น ***\n// แก้จาก file.id เป็น file.fileId ให้ตรงกับข้อมูลต้นทาง\nconst validFiles = allFiles.filter(file => file.fileId && file.fileId !== undefined);\n\n// ส่งข้อมูลที่ถูกต้องกลับออกไป\n// แก้จาก return allFiles เป็น return validFiles (ส่งตัวที่กรองแล้วออกไป)\nreturn validFiles.map(file => {\n  return {\n    json: {\n      // แก้จาก file.id เป็น file.fileId\n      fileId: file.fileId \n    }\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -144
+      ],
+      "id": "3b4c2f3f-7f3a-4f7c-b91d-974a2f5fc912",
+      "name": "Extract fileId in all platform1"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.fileId }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "value": "={{ $('Config Folder & Brand1').item.json.parent_drive }}",
+          "mode": "id"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('If have folder month1').item.json.id }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        320,
+        -336
+      ],
+      "id": "593ce22c-7028-4d5b-9076-426593dc6c34",
+      "name": "Move raw files to folder_Archived",
+      "executeOnce": false,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "move",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.fileId }}",
+          "mode": "id"
+        },
+        "driveId": {
+          "__rl": true,
+          "value": "={{ $json.parent_drive }}",
+          "mode": "id"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $('Create folder month1').item.json.id }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        544,
+        -144
+      ],
+      "id": "4460a687-f9cc-461b-a182-9a6e74b7ef16",
+      "name": "Move raw files to folder_Archived1",
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQA4vVH8yY/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=mDogCDO_DXBkboDcHu6YLs8nds4F589Y7-Gh6mwsNNI",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('Config Folder & Brand1').item.json.brandName }}{{ '_report_' }}{{ $('Config variable for regex1').item.json.year }}{{ '-' }}{{ $('Config variable for regex1').item.json.monthNumber }}{{ \" complete\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        544,
+        -336
+      ],
+      "id": "81c4657b-05bd-4ac1-9a38-38be1be67e17",
+      "name": "Notify",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQA4vVH8yY/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=mDogCDO_DXBkboDcHu6YLs8nds4F589Y7-Gh6mwsNNI",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $('Config Folder & Brand1').item.json.brandName }}{{ '_report_' }}{{ $('Config variable for regex1').item.json.year }}{{ '-' }}{{ $('Config variable for regex1').item.json.monthNumber }}{{ \" complete\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        768,
+        -144
+      ],
+      "id": "dba26e05-284c-4751-b1f6-e48bc44e7e58",
+      "name": "notify",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQA4vVH8yY/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=mDogCDO_DXBkboDcHu6YLs8nds4F589Y7-Gh6mwsNNI",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=🚨 ระบบพังจู้ ปลื้มต้องแก้อีกแล้ว ฮือๆ!\nWorkflow: {{ $workflow.name }}\nNode ที่พัง: {{ $json.execution.lastNodeExecuted }}\nสาเหตุ: {{ $json.execution.error.message }}\nLink: {{ $json.execution.url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -2912,
+        384
+      ],
+      "id": "d8d932fe-5070-40a3-bc18-f129db611da0",
+      "name": "Notify Error",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "command": "rm -f /home/node/*.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -2704,
+        384
+      ],
+      "id": "b756a708-31b5-46fb-9722-fb1614cbdfb9",
+      "name": "Clear all files"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "579b0a35-be73-47d0-b7aa-5838ce060b06",
+              "leftValue": "={{ $input.all().filter(item => item.json.fileId) }}",
+              "rightValue": 2,
+              "operator": {
+                "type": "array",
+                "operation": "lengthGt",
+                "rightType": "number"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1872,
+        -208
+      ],
+      "id": "51267d69-bfc8-47a0-9e4b-5b92adf3a4db",
+      "name": "If",
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "command": "rm -f /home/node/*.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -1856,
+        -32
+      ],
+      "id": "fb37f3c1-9e6a-466f-8dc1-d7249084826c",
+      "name": "Clean Start1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQA4vVH8yY/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=mDogCDO_DXBkboDcHu6YLs8nds4F589Y7-Gh6mwsNNI",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=🚨  {{ $json.brand }} ไฟล์ไม่ครบจ้า โปรดตรวจสอบก่อนเด้อ !!!!"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -1456,
+        -48
+      ],
+      "id": "140bc780-52e8-454d-8896-c50c88408291",
+      "name": "Notify Error1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7cf9acdd-93b2-46c8-abd3-6c4a309d040a",
+              "name": "brand",
+              "value": "={{ $json.brandName }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2528,
+        224
+      ],
+      "id": "4d61c7db-91d9-4baf-81a9-6f702c8e4d89",
+      "name": "brand"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -1648,
+        -16
+      ],
+      "id": "f157cab7-2b5b-47d7-afe1-af9a249fb243",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "fileFolder",
+        "queryString": "=",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $('Config Folder & Brand').item.json.folder_Lazada }}",
+            "mode": "id"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -304,
+        1072
+      ],
+      "id": "d2c72330-1a9a-4274-b324-009ec7676866",
+      "name": "Search files and folders LAZADA1",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a74b3118-d2f8-45fa-9986-b7a2960c9dd3",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \"((\" + $('Config variable for regex').item.json.monthShortName.toLowerCase() + \"|\" + $('Config variable for regex').item.json.monthName.toLowerCase() + \")[\\\\w\\\\s.-]*)\" +$('Config variable for regex').item.json.year   }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "d9477a7a-5c89-4542-9e37-f29007190aff",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \".*\" + $('Config Folder & Brand').item.json.brandName.toLowerCase() + \".*\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "f8037708-e455-4f25-8f75-857120dcde03",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \".*\" + \"lazada\".toLowerCase() + \".*\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        1072
+      ],
+      "id": "f777145e-cad3-4ba6-a243-7610eb2b6ae2",
+      "name": "Filterfiles_Lazada1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        400,
+        1232
+      ],
+      "id": "d9b14b6a-b2c6-448e-bfc2-48722d5776e3",
+      "name": "Download file Lazada1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0a6fd955-432c-4927-a125-d21c59d0724b",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        144,
+        1072
+      ],
+      "id": "326c5226-1993-49f3-b180-4070f1de84e8",
+      "name": "If have file4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// รับข้อมูล Input\nconst items = $input.all();\nconst returnData = [];\n\n// กำหนดชื่อ Platform ตายตัวสำหรับ Node นี้\nconst currentPlatform = 'Lazada';\n\nfor (const item of items) {\n  const row = item.json; \n  \n  // Helper Function: ค้นหา Key แบบ Case-Insensitive (ป้องกัน Header พิมพ์เล็ก/ใหญ่ ไม่ตรงกัน)\n  const get = (colName) => {\n    if (!colName) return null;\n    const key = Object.keys(row).find(k => k.trim().toLowerCase() === colName.trim().toLowerCase());\n    return key ? row[key] : null;\n  };\n\n  // Logic การแปลงข้อมูลเฉพาะของ LAZADA\n  const unitPrice = parseFloat(get('unitPrice')) || 0;\n   \n  const finalRow = {\n      \"Platform name\": currentPlatform,\n      \"Order ID\": get('orderNumber'),\n      \"Order status\": get('status'),\n      \"Cancelation/Return Type\": get('buyerFailedDeliveryReturnInitiator'),\n      \"Seller SKU\": get('sellerSku'),\n      \"Product Name\": get('itemName'),\n      \"Payment Method\": get('payMethod'),\n      \"Quantity\": 1, // Lazada มักแยกแถวต่อชิ้นอยู่แล้ว\n      \"Quantity of return\": null,\n      \"SKU Unit Original Price\": null,\n      \"SKU Subtotal Before Discount\": unitPrice,\n      \"SKU Subtotal After Discount\": get('paidPrice'),\n      \"Direct Discount\": null,\n      \"Voucher Discount\": get('sellerDiscountTotal'),\n      \"Created Time\": get('createTime'),\n      \"Delivered Time\": get('deliveredDate')\n  };\n\n  // Push ข้อมูล\n  returnData.push({ json: finalRow });\n}\n\nreturn returnData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        1056
+      ],
+      "id": "bd911184-3a06-4c46-8c55-cb72aa6a60e2",
+      "name": "Data transformation LZ1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        400,
+        1408
+      ],
+      "id": "fe6d842c-be45-412d-85f5-ca69ff927c64",
+      "name": "Extract from File Lazada1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": false
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1088,
+        1056
+      ],
+      "id": "f7eb1cb2-fc7c-4abc-9e12-30237c020be9",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/final_report.csv",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        1056
+      ],
+      "id": "500d9ef2-5a50-490d-ac64-668dc149900f",
+      "name": "Read/Write Files from Disk1"
+    },
+    {
+      "parameters": {
+        "command": "echo >> /home/node/final_report.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        1520,
+        1056
+      ],
+      "id": "74744131-fd5a-4698-a0a6-4d77c9667a4a",
+      "name": "enter new line1"
+    },
+    {
+      "parameters": {
+        "batchSize": 2000,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        640,
+        1056
+      ],
+      "id": "e3d78e25-ba0a-4174-a10b-10bb78baeed5",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst allFiles = $('Filterfiles_Lazada1').all().map(item => item.json);\n\nreturn allFiles.map(file => {\n  return {\n    json: {\n      fileId: file.id\n    }\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        864
+      ],
+      "id": "8c77322c-0bfd-4b94-9719-7594b144f55e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        400,
+        1072
+      ],
+      "id": "2cf5ea8a-4eed-4023-ab91-4e6587738e29",
+      "name": "Loop Over Items2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\n\nconst date = new Date();\n// ถอยหลังไป 1 เดือน (วันสุดท้ายของเดือนที่แล้ว)\ndate.setDate(0); \n\nconst monthNames = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\",\n  \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"\n];\nconst monthShortNames = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\",\n  \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"\n];\n\nreturn {\n  year: date.getFullYear().toString(),\n  monthNumber: ('0' + (date.getMonth() + 1)).slice(-2),\n  monthName: monthNames[date.getMonth()],\n  monthShortName: monthShortNames[date.getMonth()]\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        1072
+      ],
+      "id": "2aa1d016-7497-43d2-aebb-2d41f21fc6db",
+      "name": "Config variable for regex"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "104447ca-270c-4c63-8ac3-31120cc42ce6",
+              "name": "=brandName",
+              "value": "={{ $json.brandName }}",
+              "type": "string"
+            },
+            {
+              "id": "97ae91e5-545c-4a51-b522-1feb5d4f1b21",
+              "name": "folder_Lazada",
+              "value": "1bE7f_Qozkl7OSH6TE_1Ju3ct4hSFlfCL",
+              "type": "string"
+            },
+            {
+              "id": "5ed80f42-ebc6-41d6-be6e-29448772e4a3",
+              "name": "folder_Archive",
+              "value": "13iVrXbXVcvAE6cAGU1enFAarUih5L8Ar",
+              "type": "string"
+            },
+            {
+              "id": "09b26435-9769-44cb-b437-39fa5f88e95e",
+              "name": "folder_final_reports",
+              "value": "1f5B2RL2a9QnEFCK0GkMD8zTOlWYh5cRd",
+              "type": "string"
+            },
+            {
+              "id": "43e2d48c-c0cd-42f1-b4dc-c0dd0136506b",
+              "name": "parent_drive",
+              "value": "1TYSAJPuU9njhxnzFCilbxCkDt4f90k7X",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -672,
+        1072
+      ],
+      "id": "ded8be7d-0964-4e76-8c8d-ac05af58cf6a",
+      "name": "Config Folder & Brand"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a74b3118-d2f8-45fa-9986-b7a2960c9dd3",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \"((\" + $('Config variable for regex2').item.json.monthShortName.toLowerCase() + \"|\" + $('Config variable for regex2').item.json.monthName.toLowerCase() + \")[\\\\w\\\\s.-]*)\" +$('Config variable for regex2').item.json.year   }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "32cc8ee7-a407-4bbe-951b-406acddc1404",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \".*\" + $('Config Folder & Brand2').item.json.brandName.toLowerCase() + \".*\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "049d338f-cb58-4c04-b7e4-760ec5ddd004",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \".*\" + \"shopee\".toLowerCase() + \".*\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -1392,
+        1344
+      ],
+      "id": "46a74434-8174-467c-bdb5-07bda4f3f69e",
+      "name": "Filterfiles_Shopee1",
+      "alwaysOutputData": true,
+      "executeOnce": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0a6fd955-432c-4927-a125-d21c59d0724b",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1168,
+        1344
+      ],
+      "id": "cf29b490-c107-4dc2-89d9-1c97f3f2e329",
+      "name": "If have file3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// รับข้อมูล Input\nconst items = $input.all();\nconst returnData = [];\n\n// กำหนดชื่อ Platform ตายตัวสำหรับ Node นี้\nconst currentPlatform = 'Shopee';\n\nfor (const item of items) {\n  const row = item.json; \n  \n  // Helper Function\n  const get = (colName) => {\n    if (!colName) return null;\n    const key = Object.keys(row).find(k => k.trim().toLowerCase() === colName.trim().toLowerCase());\n    return key ? row[key] : null;\n  };\n\n  // Logic การแปลงข้อมูลเฉพาะของ SHOPEE\n  const originalPrice = parseFloat(get('ราคาตั้งต้น')) || 0;\n  const netPrice = parseFloat(get('ราคาขายสุทธิ')) || 0;\n   \n  const finalRow = {\n      \"Platform name\": currentPlatform,\n      \"Order ID\": get('หมายเลขคำสั่งซื้อ'),\n      \"Order status\": get('สถานะการสั่งซื้อ'),\n      \"Cancelation/Return Type\": get('สถานะการคืนเงินหรือคืนสินค้า'),\n      \"Seller SKU\": get('เลขอ้างอิง SKU (SKU Reference No.)'),\n      \"Product Name\": get('ชื่อสินค้า'),\n      \"Payment Method\": get('ช่องทางการชำระเงิน'),\n      \"Quantity\": parseInt(get('จำนวน')) || 0, \n      \"Quantity of return\": get('Returned quantity'),\n      \"SKU Unit Original Price\": originalPrice,\n      \"SKU Subtotal Before Discount\": netPrice,\n      \"SKU Subtotal After Discount\": null,\n      \"Direct Discount\": originalPrice - netPrice, \n      \"Voucher Discount\": get('โค้ดส่วนลดชำระโดยผู้ขาย'),\n      \"Created Time\": get('วันที่ทำการสั่งซื้อ'),\n      \"Delivered Time\": get('เวลาส่งสินค้า')\n  };\n\n  // Push ข้อมูล\n  returnData.push({ json: finalRow });\n}\n\nreturn returnData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        1296
+      ],
+      "id": "c61aba8f-2188-444e-af91-05fded869236",
+      "name": "Data transformation SH1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "fileFolder",
+        "queryString": "=",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $('Config Folder & Brand2').item.json.folder_Shopee }}",
+            "mode": "id"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1616,
+        1344
+      ],
+      "id": "471fd7b3-2060-4750-987e-2a5bdb1629c9",
+      "name": "Search files and folders SHOPEE1",
+      "alwaysOutputData": true,
+      "retryOnFail": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": false
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        1296
+      ],
+      "id": "99f81b86-2185-4338-aa45-0ce36ee350b1",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/final_report.csv",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1296
+      ],
+      "id": "309d3402-d7a8-44ac-8f9a-d8dd5c907690",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "command": "echo >> /home/node/final_report.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        224,
+        1296
+      ],
+      "id": "294a21cd-bdc9-4e3f-925b-834e356cc9bb",
+      "name": "enter new line"
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -928,
+        1936
+      ],
+      "id": "18bc32da-d1a7-4cfe-81e2-b21310ce85ba",
+      "name": "Extract from File Shopee1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -928,
+        1680
+      ],
+      "id": "7ae8ec83-6fb6-4bac-a154-356bb86fe711",
+      "name": "Download file Shopee",
+      "executeOnce": false,
+      "alwaysOutputData": true,
+      "notesInFlow": false,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        -928,
+        1504
+      ],
+      "id": "bc1c29fd-f68a-4216-88fa-94eb85c69f82"
+    },
+    {
+      "parameters": {
+        "batchSize": 2000,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -672,
+        1296
+      ],
+      "id": "41771db0-c6a6-45a5-9df5-4fe3cbbb9b7a",
+      "name": "Loop Over Items3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\n\nconst date = new Date();\n// ถอยหลังไป 1 เดือน (วันสุดท้ายของเดือนที่แล้ว)\ndate.setDate(0); \n\nconst monthNames = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\",\n  \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"\n];\nconst monthShortNames = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\",\n  \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"\n];\n\nreturn {\n  year: date.getFullYear().toString(),\n  monthNumber: ('0' + (date.getMonth() + 1)).slice(-2),\n  monthName: monthNames[date.getMonth()],\n  monthShortName: monthShortNames[date.getMonth()]\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1808,
+        1344
+      ],
+      "id": "36434667-7f4c-432b-b12a-92ba1cbfd503",
+      "name": "Config variable for regex2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "104447ca-270c-4c63-8ac3-31120cc42ce6",
+              "name": "=brandName",
+              "value": "={{ $json.brandName }}",
+              "type": "string"
+            },
+            {
+              "id": "70f67873-a248-4266-8faf-4419677925c1",
+              "name": "folder_Shopee",
+              "value": "18h85AfnPI_NhUzqwcMIH8Xw3rLV43Vzv",
+              "type": "string"
+            },
+            {
+              "id": "5ed80f42-ebc6-41d6-be6e-29448772e4a3",
+              "name": "folder_Archive",
+              "value": "13iVrXbXVcvAE6cAGU1enFAarUih5L8Ar",
+              "type": "string"
+            },
+            {
+              "id": "09b26435-9769-44cb-b437-39fa5f88e95e",
+              "name": "folder_final_reports",
+              "value": "1f5B2RL2a9QnEFCK0GkMD8zTOlWYh5cRd",
+              "type": "string"
+            },
+            {
+              "id": "43e2d48c-c0cd-42f1-b4dc-c0dd0136506b",
+              "name": "parent_drive",
+              "value": "1TYSAJPuU9njhxnzFCilbxCkDt4f90k7X",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2032,
+        1344
+      ],
+      "id": "2e7c4241-ec27-4ce3-8d71-6430b9636b63",
+      "name": "Config Folder & Brand2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst allFiles = $('Filterfiles_Shopee1').all().map(item => item.json);\n\nreturn allFiles.map(file => {\n  return {\n    json: {\n      fileId: file.id\n    }\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -464,
+        1104
+      ],
+      "id": "06a2f794-7e0d-4bc4-b1da-04f9746a80c7",
+      "name": "Code in JavaScript1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -928,
+        1296
+      ],
+      "id": "6f5e0ec2-a24f-43b9-abb9-976eb533077f",
+      "name": "Loop Over Items4"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "resource": "fileFolder",
+        "queryString": "=",
+        "returnAll": true,
+        "filter": {
+          "folderId": {
+            "__rl": true,
+            "value": "={{ $('Config Folder & Brand3').item.json.folder_Tiktok }}",
+            "mode": "id"
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -2032,
+        2384
+      ],
+      "id": "96c1ca89-5185-490b-b5da-b8df9c5b4639",
+      "name": "Search files and folders TIKTOK1",
+      "executeOnce": true,
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a74b3118-d2f8-45fa-9986-b7a2960c9dd3",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \"((\" + $('Config variable for regex3').item.json.monthShortName.toLowerCase() + \"|\" + $('Config variable for regex3').item.json.monthName.toLowerCase() + \")[\\\\w\\\\s.-]*)\" +$('Config variable for regex3').item.json.year   }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "74df6acf-ee53-4d7d-827e-09483455f4b9",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \".*\" + $('Config Folder & Brand3').item.json.brandName.toLowerCase() + \".*\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "48c821d5-2f91-45e5-98b9-5963b0ad0e43",
+              "leftValue": "={{ $json.name.toLowerCase() }}",
+              "rightValue": "={{ \".*\" + \"tiktok\".toLowerCase() + \".*\" }}",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -1808,
+        2384
+      ],
+      "id": "7e90210b-dc3a-4035-8474-27b297f81d8b",
+      "name": "Filterfiles_Tiktok1",
+      "executeOnce": false,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -1184,
+        2592
+      ],
+      "id": "99fd63bf-c292-46b7-9d31-3196d5a6b059",
+      "name": "Download file Tiktok1",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "waitBetweenTries": 1000
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0a6fd955-432c-4927-a125-d21c59d0724b",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1584,
+        2384
+      ],
+      "id": "211860d3-c2fa-4fd3-a05c-f6f5741ca6d8",
+      "name": "If have file5"
+    },
+    {
+      "parameters": {
+        "jsCode": "// รับข้อมูล Input\nconst items = $input.all();\nconst returnData = [];\n\n// กำหนดชื่อ Platform ตายตัวสำหรับ Node นี้\nconst currentPlatform = 'Tiktok';\n\nfor (const item of items) {\n  const row = item.json; \n  \n  // Helper Function\n  const get = (colName) => {\n    if (!colName) return null;\n    const key = Object.keys(row).find(k => k.trim().toLowerCase() === colName.trim().toLowerCase());\n    return key ? row[key] : null;\n  };\n\n  // Logic การแปลงข้อมูลเฉพาะของ TIKTOK\n  const finalRow = {\n      \"Platform name\": currentPlatform,\n      \"Order ID\": get('Order ID'),\n      \"Order status\": get('Order Substatus'),\n      \"Cancelation/Return Type\": get('Cancelation/Return Type'),\n      \"Seller SKU\": get('Seller SKU'),\n      \"Product Name\": get('Product Name'),\n      \"Payment Method\": get('Payment Method'),\n      \"Quantity\": parseInt(get('Quantity')) || 0,\n      \"Quantity of return\": get('Sku Quantity of return'),\n      \"SKU Unit Original Price\": get('SKU Unit Original Price'),\n      \"SKU Subtotal Before Discount\": get('SKU Subtotal Before Discount'),\n      \"SKU Subtotal After Discount\": get('SKU Subtotal After Discount'),\n      \"Direct Discount\": get('SKU Seller Discount'),\n      \"Voucher Discount\": null,\n      \"Created Time\": get('Created Time'),\n      \"Delivered Time\": get('Delivered Time')\n  };\n\n  // Push ข้อมูล\n  returnData.push({ json: finalRow });\n}\n\nreturn returnData;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -640,
+        2368
+      ],
+      "id": "6a7554c6-9120-4f46-9c4b-f4946e19a773",
+      "name": "Data transformation TT1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -1184,
+        2768
+      ],
+      "id": "de4ba795-7051-4f5e-8d0a-533f1ac7b663",
+      "name": "Extract from File Tiktok1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "headerRow": false
+        }
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -416,
+        2368
+      ],
+      "id": "a375da96-3795-42ef-875b-5c9c02f3e81f",
+      "name": "Convert to File2"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/home/node/final_report.csv",
+        "options": {
+          "append": true
+        }
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        2368
+      ],
+      "id": "3f407e36-613a-4085-8e16-0513d550a6d3",
+      "name": "Write Files final_report from Disk2"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nconst allFiles = $('Filterfiles_Tiktok1').all().map(item => item.json);\n\nreturn allFiles.map(file => {\n  return {\n    json: {\n      fileId: file.id\n    }\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -736,
+        2160
+      ],
+      "id": "cc1b0a87-cdd3-4b64-a0d6-ade44ad0fd2a",
+      "name": "Extract fileid"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1184,
+        2368
+      ],
+      "id": "46774430-95a6-44de-af84-a49469a10e5e",
+      "name": "Loop Over Items5"
+    },
+    {
+      "parameters": {
+        "batchSize": 2000,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -896,
+        2352
+      ],
+      "id": "56ecfe4f-e563-41d5-9622-258c573e614f",
+      "name": "Loop Over Items6"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\n\n\nconst date = new Date();\n// ถอยหลังไป 1 เดือน (วันสุดท้ายของเดือนที่แล้ว)\ndate.setDate(0); \n\nconst monthNames = [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\",\n  \"July\", \"August\", \"September\", \"October\", \"November\", \"December\"\n];\nconst monthShortNames = [\"Jan\", \"Feb\", \"Mar\", \"Apr\", \"May\", \"Jun\",\n  \"Jul\", \"Aug\", \"Sep\", \"Oct\", \"Nov\", \"Dec\"\n];\n\nreturn {\n  year: date.getFullYear().toString(),\n  monthNumber: ('0' + (date.getMonth() + 1)).slice(-2),\n  monthName: monthNames[date.getMonth()],\n  monthShortName: monthShortNames[date.getMonth()]\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2240,
+        2384
+      ],
+      "id": "f598efe3-954c-4815-82e3-5e1eb8744373",
+      "name": "Config variable for regex3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "104447ca-270c-4c63-8ac3-31120cc42ce6",
+              "name": "=brandName",
+              "value": "={{ $json.brandName }}",
+              "type": "string"
+            },
+            {
+              "id": "e181c646-0c79-419e-8f41-0f225372af29",
+              "name": "folder_Tiktok",
+              "value": "1YpZma9UWCw4k-umB09Z2x3S1bb0y2JFM",
+              "type": "string"
+            },
+            {
+              "id": "5ed80f42-ebc6-41d6-be6e-29448772e4a3",
+              "name": "folder_Archive",
+              "value": "13iVrXbXVcvAE6cAGU1enFAarUih5L8Ar",
+              "type": "string"
+            },
+            {
+              "id": "09b26435-9769-44cb-b437-39fa5f88e95e",
+              "name": "folder_final_reports",
+              "value": "1f5B2RL2a9QnEFCK0GkMD8zTOlWYh5cRd",
+              "type": "string"
+            },
+            {
+              "id": "43e2d48c-c0cd-42f1-b4dc-c0dd0136506b",
+              "name": "parent_drive",
+              "value": "1TYSAJPuU9njhxnzFCilbxCkDt4f90k7X",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2464,
+        2384
+      ],
+      "id": "6bc1e28a-b10d-49c8-8864-270e230d94a1",
+      "name": "Config Folder & Brand3"
+    },
+    {
+      "parameters": {
+        "command": "echo >> /home/node/final_report.csv"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        2368
+      ],
+      "id": "e9b27531-e88b-418a-838b-fbe955e69f55",
+      "name": "enter new line2"
+    }
+  ],
+  "connections": {
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Call '[REIM]sub_workflow disk to csv'",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config brand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call '[REIM]sub_workflow disk to csv'": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config brand": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Config Folder & Brand1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Config variable for regex1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Clean Start",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create final report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "SHOPEE",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TIKTOK",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "LAZADA",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "brand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Notify Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders in folder_Archive1": {
+      "main": [
+        [
+          {
+            "node": "If have folder month1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If have folder month1": {
+      "main": [
+        [
+          {
+            "node": "Extract fileId in all platform",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create folder month1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create folder month1": {
+      "main": [
+        [
+          {
+            "node": "Extract fileId in all platform1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "LAZADA": {
+      "main": [
+        [
+          {
+            "node": "Merge output fileId",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "SHOPEE": {
+      "main": [
+        [
+          {
+            "node": "Merge output fileId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TIKTOK": {
+      "main": [
+        [
+          {
+            "node": "Merge output fileId",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Config Folder & Brand1": {
+      "main": [
+        [
+          {
+            "node": "Combine file & config",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "link config",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Config variable for regex1": {
+      "main": [
+        [
+          {
+            "node": "Combine file & config",
+            "type": "main",
+            "index": 2
+          },
+          {
+            "node": "link config",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge output fileId": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read File final_report from Disk3": {
+      "main": [
+        [
+          {
+            "node": "Combine file & config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine file & config": {
+      "main": [
+        [
+          {
+            "node": "Upload final_report to destination",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload final_report to destination": {
+      "main": [
+        [
+          {
+            "node": "Clear files in disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear files in disk": {
+      "main": [
+        [
+          {
+            "node": "link config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "link config": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders in folder_Archive1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract fileId in all platform": {
+      "main": [
+        [
+          {
+            "node": "Move raw files to folder_Archived",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract fileId in all platform1": {
+      "main": [
+        [
+          {
+            "node": "Move raw files to folder_Archived1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move raw files to folder_Archived": {
+      "main": [
+        [
+          {
+            "node": "Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move raw files to folder_Archived1": {
+      "main": [
+        [
+          {
+            "node": "notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notify Error": {
+      "main": [
+        [
+          {
+            "node": "Clear all files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Read File final_report from Disk3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clean Start1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Start1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "brand": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Notify Error1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders LAZADA1": {
+      "main": [
+        [
+          {
+            "node": "Filterfiles_Lazada1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filterfiles_Lazada1": {
+      "main": [
+        [
+          {
+            "node": "If have file4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file Lazada1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File Lazada1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If have file4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data transformation LZ1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File Lazada1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk1": {
+      "main": [
+        [
+          {
+            "node": "enter new line1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Data transformation LZ1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enter new line1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download file Lazada1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config variable for regex": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders LAZADA1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Folder & Brand": {
+      "main": [
+        [
+          {
+            "node": "Config variable for regex",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filterfiles_Shopee1": {
+      "main": [
+        [
+          {
+            "node": "If have file3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If have file3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data transformation SH1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders SHOPEE1": {
+      "main": [
+        [
+          {
+            "node": "Filterfiles_Shopee1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "enter new line",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enter new line": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File Shopee1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file Shopee": {
+      "main": [
+        [
+          {
+            "node": "Extract from File Shopee1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Download file Shopee",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Data transformation SH1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config variable for regex2": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders SHOPEE1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Folder & Brand2": {
+      "main": [
+        [
+          {
+            "node": "Config variable for regex2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search files and folders TIKTOK1": {
+      "main": [
+        [
+          {
+            "node": "Filterfiles_Tiktok1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filterfiles_Tiktok1": {
+      "main": [
+        [
+          {
+            "node": "If have file5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file Tiktok1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File Tiktok1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If have file5": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data transformation TT1": {
+      "main": [
+        [
+          {
+            "node": "Convert to File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File Tiktok1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        [
+          {
+            "node": "Write Files final_report from Disk2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Files final_report from Disk2": {
+      "main": [
+        [
+          {
+            "node": "enter new line2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items5": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download file Tiktok1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items6": {
+      "main": [
+        [
+          {
+            "node": "Extract fileid",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Data transformation TT1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config variable for regex3": {
+      "main": [
+        [
+          {
+            "node": "Search files and folders TIKTOK1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config Folder & Brand3": {
+      "main": [
+        [
+          {
+            "node": "Config variable for regex3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "enter new line2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "8ea425bb-1e69-4ead-a338-085519cce0d9",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-01T07:06:36.812Z",
+      "createdAt": "2025-12-01T07:06:36.812Z",
+      "role": "workflow:owner",
+      "workflowId": "0t0leWgWJwHEKEtq",
+      "projectId": "wgOKw36KVCTZkEHc"
+    }
+  ],
+  "tags": []
+}
