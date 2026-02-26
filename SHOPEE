@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-02-06T06:12:39.000Z",
+  "updatedAt": "2026-02-17T06:45:47.000Z",
   "createdAt": "2025-12-01T07:08:04.222Z",
   "id": "037oeU0xxB2nPCMT",
   "name": "SHOPEE",
@@ -16,15 +16,6 @@
             "version": 2
           },
           "conditions": [
-            {
-              "id": "a74b3118-d2f8-45fa-9986-b7a2960c9dd3",
-              "leftValue": "={{ $json.name.toLowerCase() }}",
-              "rightValue": "={{ \"((\" + $('Config variable for regex1').item.json.monthShortName.toLowerCase() + \"|\" + $('Config variable for regex1').item.json.monthName.toLowerCase() + \")[\\\\w\\\\s.-]*)\" +$('Config variable for regex1').item.json.year   }}",
-              "operator": {
-                "type": "string",
-                "operation": "regex"
-              }
-            },
             {
               "id": "32cc8ee7-a407-4bbe-951b-406acddc1404",
               "leftValue": "={{ $json.name.toLowerCase() }}",
@@ -760,7 +751,7 @@
   "settings": {
     "executionOrder": "v1",
     "saveDataSuccessExecution": "none",
-    "saveManualExecutions": false,
+    "saveManualExecutions": true,
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
@@ -769,7 +760,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "485fe552-5406-4ba0-ad27-cd4b4312b27c",
+  "versionId": "3f8db026-362d-43e6-89a1-660a556dcf22",
   "triggerCount": 0,
   "shared": [
     {
