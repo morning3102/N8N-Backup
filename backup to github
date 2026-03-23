@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-03-23T03:41:33.958Z",
+  "updatedAt": "2026-03-23T03:51:40.369Z",
   "createdAt": "2026-01-19T03:52:54.643Z",
   "id": "6vTR9kxClQUILdrI",
   "name": "backup to github",
@@ -44,7 +44,8 @@
     },
     {
       "parameters": {
-        "jsCode": "// รับค่าจาก Chat Trigger\nconst rawInput = $('When chat message received').item.json.chatInput;\nconst regex = /^(.+?)\\s*-\\s*(commit|create)\\s*(?:-\\s*(.+))?$/i;\nconst match = rawInput.match(regex);\n\nreturn {\n  workflowName: match[1].trim(),\n  action: match[2].trim().toLowerCase(),\n  workflowContent: JSON.stringify(items[0].json, null, 2),\n  commitMessage: match[3] ? match[3].trim() : \"Backup updated via n8n\"\n};"
+        "mode": "runOnceForEachItem",
+        "jsCode": "const rawInput = $('When chat message received').item.json.chatInput;\nconst workflowData = $node[\"Get many workflows\"].json; // ดึงข้อมูลจากโหนดที่ Get มา\n\n// 1. แยก Input: \"ชื่อ - action - ข้อความ\"\nconst regex = /^(.+?)\\s*-\\s*(commit|create)\\s*(?:-\\s*(.+))?$/i;\nconst match = rawInput.match(regex);\n\nif (!match) throw new Error(\"รูปแบบคำสั่งไม่ถูกต้อง กรุณาใช้: Name-action-message\");\n\n// 2. จัดการเรื่อง Folder (ใช้ Tag แรกเป็นชื่อโฟลเดอร์ ถ้าไม่มีให้ลง Uncategorized)\nlet folderName = \"Uncategorized\";\nif (workflowData.tags && workflowData.tags.length > 0) {\n  // สมมติว่าคุณผูก API ไว้จนดึง Tag มาได้แล้ว\n  folderName = workflowData.tags[0].name || \"Uncategorized\"; \n}\n\n// 3. ทำความสะอาดชื่อไฟล์ (เปลี่ยนช่องว่างเป็น - และเติม .json)\nconst fileName = match[1].trim().replace(/\\s+/g, '-').toLowerCase() + '.json';\nconst fullPath = `${folderName}/${fileName}`;\n\nreturn {\n  workflowName: match[1].trim(),\n  filePath: fullPath, // ส่ง Path เต็มไปใช้ใน GitHub Node\n  action: match[2].trim().toLowerCase(),\n  workflowContent: JSON.stringify(workflowData, null, 2),\n  commitMessage: match[3] ? match[3].trim() : `Update ${match[1].trim()}`\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -259,7 +260,7 @@
     "templateCredsSetupCompleted": true
   },
   "pinData": {},
-  "versionId": "b55e5860-3364-43ea-b73e-5ed245ca2297",
+  "versionId": "cd24946e-20f2-496c-8317-15e647b51f9f",
   "activeVersionId": null,
   "triggerCount": 0,
   "shared": [
