@@ -1,0 +1,276 @@
+{
+  "updatedAt": "2026-03-23T03:41:33.958Z",
+  "createdAt": "2026-01-19T03:52:54.643Z",
+  "id": "6vTR9kxClQUILdrI",
+  "name": "backup to github",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        64
+      ],
+      "id": "df05679e-e2d6-44da-901b-e9a89f3e5142",
+      "name": "When chat message received",
+      "webhookId": "9d5421e6-1ba8-4e9f-ab03-8ddffa4c39d1"
+    },
+    {
+      "parameters": {
+        "filters": {
+          "name": "={{ $json.chatInput.split('-')[0].replace(/\"/g, '') }}"
+        },
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        208,
+        64
+      ],
+      "id": "a30f83df-a59f-47de-bfd5-1a09b1b4db7f",
+      "name": "Get many workflows",
+      "credentials": {
+        "n8nApi": {
+          "id": "oslmWfVS0LvB071m",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// รับค่าจาก Chat Trigger\nconst rawInput = $('When chat message received').item.json.chatInput;\nconst regex = /^(.+?)\\s*-\\s*(commit|create)\\s*(?:-\\s*(.+))?$/i;\nconst match = rawInput.match(regex);\n\nreturn {\n  workflowName: match[1].trim(),\n  action: match[2].trim().toLowerCase(),\n  workflowContent: JSON.stringify(items[0].json, null, 2),\n  commitMessage: match[3] ? match[3].trim() : \"Backup updated via n8n\"\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        416,
+        64
+      ],
+      "id": "da2f74ef-0040-4672-9515-d6dab426655d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/morning3102/N8N-Backup.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "N8N-Backup",
+          "mode": "list",
+          "cachedResultName": "N8N-Backup",
+          "cachedResultUrl": "https://github.com/morning3102/N8N-Backup"
+        },
+        "filePath": "={{ $json.workflowName }}",
+        "fileContent": "={{ $json.workflowContent }}",
+        "commitMessage": "={{ $json.commitMessage }}",
+        "additionalParameters": {
+          "author": {
+            "name": "morning3102",
+            "email": "jirakit.aru@whitelineactivation.com"
+          }
+        }
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        240
+      ],
+      "id": "3e500318-3804-480a-ba2e-128c053fefff",
+      "name": "Create a file",
+      "webhookId": "eaea0abc-97bc-44f9-88cf-6916eb2d3600",
+      "credentials": {
+        "githubApi": {
+          "id": "Q8QhrK85bWkgPh2T",
+          "name": "GitHub backup N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/morning3102/N8N-Backup.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "N8N-Backup",
+          "mode": "list",
+          "cachedResultName": "N8N-Backup",
+          "cachedResultUrl": "https://github.com/morning3102/N8N-Backup"
+        },
+        "filePath": "={{ $json.workflowName }}",
+        "fileContent": "={{ $json.workflowContent }}",
+        "commitMessage": "={{ $json.commitMessage }}"
+      },
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        48
+      ],
+      "id": "9408f225-185b-4ca6-a97a-75e31b314f78",
+      "name": "Edit a file",
+      "webhookId": "eaea0abc-97bc-44f9-88cf-6916eb2d3600",
+      "credentials": {
+        "githubApi": {
+          "id": "Q8QhrK85bWkgPh2T",
+          "name": "GitHub backup N8N"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "commit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b02ad08b-23be-4aa5-b445-d111e88ed566"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "commit"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2e56c09b-729f-402f-94fe-11c6a2cf0f5b",
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "create",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        640,
+        64
+      ],
+      "id": "e00bd591-9a40-4a4b-b859-c7cc6c98ad8a",
+      "name": "Switch"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Get many workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many workflows": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit a file",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Create a file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "b55e5860-3364-43ea-b73e-5ed245ca2297",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-19T03:52:54.649Z",
+      "createdAt": "2026-01-19T03:52:54.649Z",
+      "role": "workflow:owner",
+      "workflowId": "6vTR9kxClQUILdrI",
+      "projectId": "wgOKw36KVCTZkEHc"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
