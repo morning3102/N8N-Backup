@@ -1,0 +1,2257 @@
+{
+  "updatedAt": "2026-03-17T06:05:58.762Z",
+  "createdAt": "2026-02-05T06:28:19.506Z",
+  "id": "a9TFsDvnm7vIWSgI",
+  "name": "BigQ Advance report",
+  "active": true,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 8
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        160
+      ],
+      "id": "0624b495-344f-4a00-9452-5b0dc175412d",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "projectId": {
+          "__rl": true,
+          "value": "mango-erp-report",
+          "mode": "list",
+          "cachedResultName": "Mango ERP Report",
+          "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=mango-erp-report"
+        },
+        "sqlQuery": "SELECT \n  company,\n  cust_name,\n  refcode,\n  pre_des,\n  BU,\n  `Site Engineer`,\n  `Project Manager`,\n  `Start Date`,\n  `End Date`,\n  `Due Date`,\n  FORMAT(\"%' .2f\", `Estimate Cost`) AS `Estimate Cost`,\n  `%ADV`,\n  FORMAT(\"%' .2f\", `Fixed ADV`) AS `Fixed ADV`,\n  FORMAT(\"%' .2f\", `Advance ที่เบิก`) AS `Advance ที่เบิก`,\n  FORMAT(\"%' .2f\", Balance) AS Balance,\n  Overdue,\n  FORMAT(\"%' .2f\", Advance) AS Advance,\n  FORMAT(\"%' .2f\", `Clear Adv ในก้อนตั้งหนี้แล้ว`) AS `Clear Adv ในก้อนตั้งหนี้แล้ว`,\n  FORMAT(\"%' .2f\", `Clear Adv ในก้อนยังไม่ตั้งหนี้`) AS `Clear Adv ในก้อนยังไม่ตั้งหนี้`,\n  FORMAT(\"%' .2f\", `Clear Adv คงเหลือ`) AS `Clear Adv คงเหลือ`,\n  FORMAT(\"%' .2f\", `ยอดคงเหลือตาม GL`) AS `ยอดคงเหลือตาม GL`,\n  FORMAT(\"%' .2f\", `Clear Adv เบิกเพิ่ม`) AS `Clear Adv เบิกเพิ่ม`,\n  FORMAT(\"%' .2f\", `Other เบิกเพิ่ม`) AS `Other เบิกเพิ่ม`,\n  FORMAT(\"%' .2f\", `Total เบิก`) AS `Total เบิก`,\n  FORMAT(\"%' .2f\", aaa.`Clear Adv คงเหลือ due date not yet`) AS `Clear Adv คงเหลือ due date not yet`,\n  FORMAT(\"%' .2f\", aaa.`Clear Adv คงเหลือ Over 1-5 Day`) AS `Clear Adv คงเหลือ Over 1-5 Day`,\n  FORMAT(\"%' .2f\", aaa.`Clear Adv คงเหลือ Over 6-10 Day`) AS `Clear Adv คงเหลือ Over 6-10 Day`,\n  FORMAT(\"%' .2f\", aaa.`Clear Adv คงเหลือ Over 11 Day`) AS `Clear Adv คงเหลือ Over 11 Day`,\n  FORMAT(\"%' .2f\", `Check diff Clear Adv คงเหลือ - ยอดคงเหลือตาม GL`) AS `Check diff Clear Adv คงเหลือ - ยอดคงเหลือตาม GL`\nFROM `mango-erp-report.datamart.V_Advance_Report`  AS aaa\nWHERE aaa.`End Date` >= '2026-01-01'\nORDER BY aaa.cust_name ASC, aaa.Overdue DESC\nLIMIT 10000",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleBigQuery",
+      "typeVersion": 2.1,
+      "position": [
+        256,
+        -16
+      ],
+      "id": "a49f98e5-0875-4488-aaa9-d2e15d2d0c26",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "remove",
+        "documentId": {
+          "__rl": true,
+          "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Advance report daily",
+          "mode": "name"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        -16
+      ],
+      "id": "6ccfffb6-ee93-43fc-8ba7-2c17608f4fe9",
+      "name": "Delete sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQA27LuCBA/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=0OSfaZMV5vTczbreye6bx_lYEUcBe-yjQ-n29FrlhkE",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{\n  `n8n Sync: *SUCCESS✅* \nJob: Advance report daily \n📅 DateTime: ${$now.format('DD HH:mm:ss')} \n⏳ Duration: ${$now.diff(DateTime.fromISO(($node[\"Schedule Trigger\"]) && $node[\"Schedule Trigger\"] && $now.toISO())).toFormat(\"m 'min' s 'sec'\")} ` \n}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1296,
+        192
+      ],
+      "id": "dd49cdcc-a396-4b88-8f67-9b926b4684d7",
+      "name": "HTTP Request",
+      "executeOnce": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        464,
+        -256
+      ],
+      "id": "8476c05f-55ec-4d9c-8fb3-3ab925b9cb52",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://chat.googleapis.com/v1/spaces/AAQA27LuCBA/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=0OSfaZMV5vTczbreye6bx_lYEUcBe-yjQ-n29FrlhkE",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "=n8n Update Advance report daily *Fail* ❌ \n📅 Date/Time: {{ $now.format('DD HH:mm:ss') }} \n⚠️ Node: {{ $json.execution.lastNodeExecuted }} \n🔍 Reason:: {{ $json.execution.error.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        656,
+        -256
+      ],
+      "id": "e0ece1b7-1d84-4864-9f9e-b139d2230f53",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "remove",
+        "documentId": {
+          "__rl": true,
+          "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Data2",
+          "mode": "name"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        160
+      ],
+      "id": "6a018b5d-bb85-4e83-a929-f704666cec33",
+      "name": "Delete sheet Data2",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "title": "Data2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        80,
+        160
+      ],
+      "id": "c55894a6-6488-4701-923e-08cd604f98ef",
+      "name": "Create sheet Data2",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "projectId": {
+          "__rl": true,
+          "value": "mango-erp-report",
+          "mode": "list",
+          "cachedResultName": "Mango ERP Report",
+          "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=mango-erp-report"
+        },
+        "sqlQuery": "SELECT\n  Company,\n  `Cust Name`,\n  `Ref Code`,\n  `Project Name`,\n  `Start Date`,\n  `End Date`,\n  `OF no`,\n  `Refdate_s`,\n  FORMAT(\"%' .2f\",`Total Othnetamt`) AS `Total Othnetamt`,\n  FORMAT(\"%' .2f\",`Total Paynetamt`) AS `Total Paynetamt`\nFROM `mango-erp-report.datamart.V_Advance_Report_Data2`  AS bbb\nWHERE bbb.`End Date` >= '2026-01-01'\nORDER BY bbb.`Cust name` ASC\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleBigQuery",
+      "typeVersion": 2.1,
+      "position": [
+        256,
+        160
+      ],
+      "id": "ec4e18fd-6abb-4660-8a5c-3b0963354fe2",
+      "name": "Execute a SQL_V_Advance_Report_Data2",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "projectId": {
+          "__rl": true,
+          "value": "mango-erp-report",
+          "mode": "list",
+          "cachedResultName": "Mango ERP Report",
+          "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=mango-erp-report"
+        },
+        "sqlQuery": "SELECT \n  cust_name,\n  FORMAT(\"%' .2f\",total_clear_adv) AS total_clear_adv ,\n  FORMAT(\"%' .2f\",percentage_of_total) AS percentage_of_total\nFROM `mango-erp-report.datamart.V_Adv_Percent_Total`  AS ccc\nORDER BY ccc.cust_name ASC\nLIMIT 10000",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleBigQuery",
+      "typeVersion": 2.1,
+      "position": [
+        256,
+        352
+      ],
+      "id": "1924211a-f594-4956-84c2-916f43356914",
+      "name": "Execute a SQL_V_Adv_Percent_Total",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "remove",
+        "documentId": {
+          "__rl": true,
+          "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "%Onhand",
+          "mode": "name"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -96,
+        352
+      ],
+      "id": "920eaf97-03b0-44f7-9510-8b0d1008d1da",
+      "name": "Delete sheet %Onhand",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Data2",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cust_name",
+              "displayName": "cust_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "refcode",
+              "displayName": "refcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pre_des",
+              "displayName": "pre_des",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Start_Date",
+              "displayName": "Start_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "End_Date",
+              "displayName": "End_Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "OF_no",
+              "displayName": "OF_no",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "refdate_s",
+              "displayName": "refdate_s",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total_othnetamt",
+              "displayName": "total_othnetamt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "total_paynetamt",
+              "displayName": "total_paynetamt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        160
+      ],
+      "id": "974140c2-5f93-4eb2-8998-3d11a8345435",
+      "name": "Append or update row in Data2",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "%Onhand",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        352
+      ],
+      "id": "0e4cd7fe-6ce7-48c9-bbe4-269efe4be741",
+      "name": "Append or update row in %Onhand",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "title": "%Onhand",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        80,
+        352
+      ],
+      "id": "20ace854-827f-426c-ba2f-9d85f4f0e5d1",
+      "name": "Create sheet %Onhand",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1120,
+        176
+      ],
+      "id": "a27bd879-f7e1-4c45-a058-1ca295b5eb84",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "=10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Advance report daily",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "company",
+              "displayName": "company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "cust_name",
+              "displayName": "cust_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "refcode",
+              "displayName": "refcode",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pre_des",
+              "displayName": "pre_des",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "BU",
+              "displayName": "BU",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Site Engineer",
+              "displayName": "Site Engineer",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Project Manager",
+              "displayName": "Project Manager",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Start Date",
+              "displayName": "Start Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "End Date",
+              "displayName": "End Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Overdue",
+              "displayName": "Overdue",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Advance",
+              "displayName": "Advance",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clear Adv ในก้อนตั้งหนี้แล้ว",
+              "displayName": "Clear Adv ในก้อนตั้งหนี้แล้ว",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clear Adv ในก้อนยังไม่ตั้งหนี้",
+              "displayName": "Clear Adv ในก้อนยังไม่ตั้งหนี้",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clear Adv คงเหลือ",
+              "displayName": "Clear Adv คงเหลือ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ยอดคงเหลือตาม GL",
+              "displayName": "ยอดคงเหลือตาม GL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clear Adv เบิกเพิ่ม",
+              "displayName": "Clear Adv เบิกเพิ่ม",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Other เบิกเพิ่ม",
+              "displayName": "Other เบิกเพิ่ม",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Total เบิก",
+              "displayName": "Total เบิก",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clear Adv คงเหลือ due date not yet",
+              "displayName": "Clear Adv คงเหลือ due date not yet",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clear Adv คงเหลือ Over 1-5 Day",
+              "displayName": "Clear Adv คงเหลือ Over 1-5 Day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clear Adv คงเหลือ Over 6-10 Day",
+              "displayName": "Clear Adv คงเหลือ Over 6-10 Day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Clear Adv คงเหลือ Over 11 Day",
+              "displayName": "Clear Adv คงเหลือ Over 11 Day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Check diff Clear Adv คงเหลือ - ยอดคงเหลือตาม GL",
+              "displayName": "Check diff Clear Adv คงเหลือ - ยอดคงเหลือตาม GL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "eff69aaa-3598-410b-8485-16e4d0d2b361",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "create",
+        "documentId": {
+          "__rl": true,
+          "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+          "mode": "id"
+        },
+        "title": "Advance report daily",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        80,
+        -16
+      ],
+      "id": "ea7207af-5da7-4c31-8246-a6ece5758816",
+      "name": "Create sheet Advance report daily",
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"repeatCell\": {\n        \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 0, \"endColumnIndex\": 29 },\n        \"cell\": { \n          \"userEnteredFormat\": { \n            \"textFormat\": { \"bold\": true },\n            \"verticalAlignment\": \"MIDDLE\",\n            \"horizontalAlignment\": \"CENTER\",\n            \"wrapStrategy\": \"WRAP\"\n          } \n        },\n        \"fields\": \"userEnteredFormat(textFormat,verticalAlignment,horizontalAlignment,wrapStrategy)\"\n      }\n    },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 0, \"endColumnIndex\": 7 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.74, \"green\": 0.74, \"blue\": 0.74 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 7, \"endColumnIndex\": 10 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.91, \"green\": 0.76, \"blue\": 0.63 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 10, \"endColumnIndex\": 13 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 1, \"green\": 0, \"blue\": 0 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 13, \"endColumnIndex\": 15 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 1, \"green\": 0.5, \"blue\": 0.1 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 15, \"endColumnIndex\": 16 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.95, \"green\": 0.76, \"blue\": 0.2 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 16, \"endColumnIndex\": 19 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.64, \"green\": 0.85, \"blue\": 0.97 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 19, \"endColumnIndex\": 20 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.29, \"green\": 0.53, \"blue\": 0.91 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 20, \"endColumnIndex\": 21 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 1, \"green\": 1, \"blue\": 0.26 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 21, \"endColumnIndex\": 23 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.84, \"green\": 0.65, \"blue\": 0.74 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 23, \"endColumnIndex\": 24 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 1, \"green\": 1, \"blue\": 0.26 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 24, \"endColumnIndex\": 25 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0, \"green\": 0, \"blue\": 0 }, \"textFormat\": { \"bold\": true, \"foregroundColor\": { \"red\": 1, \"green\": 1, \"blue\": 1 } } } }, \"fields\": \"userEnteredFormat(backgroundColor,textFormat)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 25, \"endColumnIndex\": 28 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.88, \"green\": 0.4, \"blue\": 0.4 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 28, \"endColumnIndex\": 29 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.74, \"green\": 0.74, \"blue\": 0.74 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"dimension\": \"COLUMNS\", \"startIndex\": 0, \"endIndex\": 11 }\n      }\n    },\n    {\n      \"updateDimensionProperties\": {\n        \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"dimension\": \"COLUMNS\", \"startIndex\": 11, \"endIndex\": 29 },\n        \"properties\": { \"pixelSize\": 80 },\n        \"fields\": \"pixelSize\"\n      }\n    },\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"dimension\": \"ROWS\", \"startIndex\": 0, \"endIndex\": 1 }\n      }\n    },\n    {\n      \"setBasicFilter\": {\n        \"filter\": {\n          \"range\": {\n            \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }},\n            \"startRowIndex\": 0,\n            \"startColumnIndex\": 0,\n            \"endColumnIndex\": 29\n          }\n        }\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        656,
+        -16
+      ],
+      "id": "754011c3-4e10-4dcb-bc67-c8cde962929e",
+      "name": "Set column color",
+      "executeOnce": true,
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"repeatCell\": {\n        \"range\": {\n          \"sheetId\": {{ $(\"Create sheet Data2\").first().json.sheetId }},\n          \"startRowIndex\": 0,\n          \"endRowIndex\": 1,\n          \"startColumnIndex\": 0,\n          \"endColumnIndex\": 10\n        },\n        \"cell\": {\n          \"userEnteredFormat\": {\n            \"backgroundColor\": {\n              \"red\": 0.64,\n              \"green\": 0.85,\n              \"blue\": 0.97\n            },\n            \"textFormat\": {\n              \"bold\": true,\n              \"fontSize\": 10\n            },\n            \"verticalAlignment\": \"MIDDLE\",\n            \"horizontalAlignment\": \"LEFT\"\n          }\n        },\n        \"fields\": \"userEnteredFormat(backgroundColor,textFormat,verticalAlignment,horizontalAlignment)\"\n      }\n    },\n    {\n      \"setBasicFilter\": {\n        \"filter\": {\n          \"range\": {\n            \"sheetId\": {{ $(\"Create sheet Data2\").first().json.sheetId }},\n            \"startRowIndex\": 0,\n            \"startColumnIndex\": 0,\n            \"endColumnIndex\": 10\n          }\n        }\n      }\n    },\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": {\n          \"sheetId\": {{ $(\"Create sheet Data2\").first().json.sheetId }},\n          \"dimension\": \"COLUMNS\",\n          \"startIndex\": 0,\n          \"endIndex\": 10\n        }\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        656,
+        160
+      ],
+      "id": "916ea1ea-9dc0-41ab-826b-bc3979ff6e37",
+      "name": "Set column color Sheet data2",
+      "executeOnce": true,
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://sheets.googleapis.com/v4/spreadsheets/10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80:batchUpdate",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"requests\": [\n    {\n      \"repeatCell\": {\n        \"range\": {\n          \"sheetId\": {{ $(\"Create sheet %Onhand\").first().json.sheetId }},\n          \"startRowIndex\": 0,\n          \"endRowIndex\": 1,\n          \"startColumnIndex\": 0,\n          \"endColumnIndex\": 3\n        },\n        \"cell\": {\n          \"userEnteredFormat\": {\n            \"backgroundColor\": {\n              \"red\": 0.64,\n              \"green\": 0.85,\n              \"blue\": 0.97\n            },\n            \"textFormat\": {\n              \"bold\": true,\n              \"fontSize\": 10\n            },\n            \"verticalAlignment\": \"MIDDLE\",\n            \"horizontalAlignment\": \"LEFT\"\n          }\n        },\n        \"fields\": \"userEnteredFormat(backgroundColor,textFormat,verticalAlignment,horizontalAlignment)\"\n      }\n    },\n    {\n      \"setBasicFilter\": {\n        \"filter\": {\n          \"range\": {\n            \"sheetId\": {{ $(\"Create sheet %Onhand\").first().json.sheetId }},\n            \"startRowIndex\": 0,\n            \"startColumnIndex\": 0,\n            \"endColumnIndex\": 3\n          }\n        }\n      }\n    },\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": {\n          \"sheetId\": {{ $(\"Create sheet %Onhand\").first().json.sheetId }},\n          \"dimension\": \"COLUMNS\",\n          \"startIndex\": 0,\n          \"endIndex\": 3\n        }\n      }\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        656,
+        352
+      ],
+      "id": "b6431379-6a7e-4278-9fc3-507dd61682df",
+      "name": "Set column color % Onhand",
+      "executeOnce": true,
+      "credentials": {
+        "googleApi": {
+          "id": "ngHeKL8zwD5nwdFY",
+          "name": "Google Service Account - ERP"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Delete sheet %Onhand",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete sheet Data2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Delete sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete sheet": {
+      "main": [
+        [
+          {
+            "node": "Create sheet Advance report daily",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete sheet Data2": {
+      "main": [
+        [
+          {
+            "node": "Create sheet Data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create sheet Data2": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL_V_Advance_Report_Data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL_V_Advance_Report_Data2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in Data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL_V_Adv_Percent_Total": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in %Onhand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete sheet %Onhand": {
+      "main": [
+        [
+          {
+            "node": "Create sheet %Onhand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in Data2": {
+      "main": [
+        [
+          {
+            "node": "Set column color Sheet data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in %Onhand": {
+      "main": [
+        [
+          {
+            "node": "Set column color % Onhand",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create sheet %Onhand": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL_V_Adv_Percent_Total",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Set column color",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create sheet Advance report daily": {
+      "main": [
+        [
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set column color": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set column color Sheet data2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Set column color % Onhand": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Bangkok",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0ce98490-e0b4-4341-ba4d-a7ff5ea3e678",
+  "activeVersionId": "4f89e11d-66db-49e1-b20c-f50775d5dd05",
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2026-02-05T06:28:19.516Z",
+      "createdAt": "2026-02-05T06:28:19.516Z",
+      "role": "workflow:owner",
+      "workflowId": "a9TFsDvnm7vIWSgI",
+      "projectId": "wgOKw36KVCTZkEHc"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2026-03-06T11:41:22.000Z",
+    "createdAt": "2026-03-06T11:39:51.160Z",
+    "versionId": "4f89e11d-66db-49e1-b20c-f50775d5dd05",
+    "workflowId": "a9TFsDvnm7vIWSgI",
+    "nodes": [
+      {
+        "parameters": {
+          "rule": {
+            "interval": [
+              {
+                "triggerAtHour": 8
+              }
+            ]
+          }
+        },
+        "type": "n8n-nodes-base.scheduleTrigger",
+        "typeVersion": 1.3,
+        "position": [
+          -432,
+          160
+        ],
+        "id": "0624b495-344f-4a00-9452-5b0dc175412d",
+        "name": "Schedule Trigger"
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "projectId": {
+            "__rl": true,
+            "value": "mango-erp-report",
+            "mode": "list",
+            "cachedResultName": "Mango ERP Report",
+            "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=mango-erp-report"
+          },
+          "sqlQuery": "SELECT \n  company,\n  cust_name,\n  refcode,\n  pre_des,\n  BU,\n  `Site Engineer`,\n  `Project Manager`,\n  `Start Date`,\n  `End Date`,\n  `Due Date`,\n  FORMAT(\"%' .2f\", `Estimate Cost`) AS `Estimate Cost`,\n  `%ADV`,\n  FORMAT(\"%' .2f\", `Fixed ADV`) AS `Fixed ADV`,\n  FORMAT(\"%' .2f\", `Advance ที่เบิก`) AS `Advance ที่เบิก`,\n  FORMAT(\"%' .2f\", Balance) AS Balance,\n  Overdue,\n  FORMAT(\"%' .2f\", Advance) AS Advance,\n  FORMAT(\"%' .2f\", `Clear Adv ในก้อนตั้งหนี้แล้ว`) AS `Clear Adv ในก้อนตั้งหนี้แล้ว`,\n  FORMAT(\"%' .2f\", `Clear Adv ในก้อนยังไม่ตั้งหนี้`) AS `Clear Adv ในก้อนยังไม่ตั้งหนี้`,\n  FORMAT(\"%' .2f\", `Clear Adv คงเหลือ`) AS `Clear Adv คงเหลือ`,\n  FORMAT(\"%' .2f\", `ยอดคงเหลือตาม GL`) AS `ยอดคงเหลือตาม GL`,\n  FORMAT(\"%' .2f\", `Clear Adv เบิกเพิ่ม`) AS `Clear Adv เบิกเพิ่ม`,\n  FORMAT(\"%' .2f\", `Other เบิกเพิ่ม`) AS `Other เบิกเพิ่ม`,\n  FORMAT(\"%' .2f\", `Total เบิก`) AS `Total เบิก`,\n  FORMAT(\"%' .2f\", aaa.`Clear Adv คงเหลือ due date not yet`) AS `Clear Adv คงเหลือ due date not yet`,\n  FORMAT(\"%' .2f\", aaa.`Clear Adv คงเหลือ Over 1-5 Day`) AS `Clear Adv คงเหลือ Over 1-5 Day`,\n  FORMAT(\"%' .2f\", aaa.`Clear Adv คงเหลือ Over 6-10 Day`) AS `Clear Adv คงเหลือ Over 6-10 Day`,\n  FORMAT(\"%' .2f\", aaa.`Clear Adv คงเหลือ Over 11 Day`) AS `Clear Adv คงเหลือ Over 11 Day`,\n  FORMAT(\"%' .2f\", `Check diff Clear Adv คงเหลือ - ยอดคงเหลือตาม GL`) AS `Check diff Clear Adv คงเหลือ - ยอดคงเหลือตาม GL`\nFROM `mango-erp-report.datamart.V_Advance_Report`  AS aaa\nWHERE aaa.`End Date` >= '2026-01-01'\nORDER BY aaa.cust_name ASC, aaa.Overdue DESC\nLIMIT 10000",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleBigQuery",
+        "typeVersion": 2.1,
+        "position": [
+          256,
+          -16
+        ],
+        "id": "a49f98e5-0875-4488-aaa9-d2e15d2d0c26",
+        "name": "Execute a SQL query",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "remove",
+          "documentId": {
+            "__rl": true,
+            "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Advance report daily",
+            "mode": "name"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          -96,
+          -16
+        ],
+        "id": "6ccfffb6-ee93-43fc-8ba7-2c17608f4fe9",
+        "name": "Delete sheet",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://chat.googleapis.com/v1/spaces/AAQA27LuCBA/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=0OSfaZMV5vTczbreye6bx_lYEUcBe-yjQ-n29FrlhkE",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "text",
+                "value": "={{\n  `n8n Sync: *SUCCESS✅* \nJob: Advance report daily \n📅 DateTime: ${$now.format('DD HH:mm:ss')} \n⏳ Duration: ${$now.diff(DateTime.fromISO(($node[\"Schedule Trigger\"]) && $node[\"Schedule Trigger\"] && $now.toISO())).toFormat(\"m 'min' s 'sec'\")} ` \n}}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          1296,
+          192
+        ],
+        "id": "dd49cdcc-a396-4b88-8f67-9b926b4684d7",
+        "name": "HTTP Request",
+        "executeOnce": true
+      },
+      {
+        "parameters": {},
+        "type": "n8n-nodes-base.errorTrigger",
+        "typeVersion": 1,
+        "position": [
+          464,
+          -256
+        ],
+        "id": "8476c05f-55ec-4d9c-8fb3-3ab925b9cb52",
+        "name": "Error Trigger"
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://chat.googleapis.com/v1/spaces/AAQA27LuCBA/messages?key=AIzaSyDdI0hCZtE6vySjMm-WEfRq3CPzqKqqsHI&token=0OSfaZMV5vTczbreye6bx_lYEUcBe-yjQ-n29FrlhkE",
+          "sendBody": true,
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "text",
+                "value": "=n8n Update Advance report daily *Fail* ❌ \n📅 Date/Time: {{ $now.format('DD HH:mm:ss') }} \n⚠️ Node: {{ $json.execution.lastNodeExecuted }} \n🔍 Reason:: {{ $json.execution.error.message }}"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          656,
+          -256
+        ],
+        "id": "e0ece1b7-1d84-4864-9f9e-b139d2230f53",
+        "name": "HTTP Request1"
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "remove",
+          "documentId": {
+            "__rl": true,
+            "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Data2",
+            "mode": "name"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          -96,
+          160
+        ],
+        "id": "6a018b5d-bb85-4e83-a929-f704666cec33",
+        "name": "Delete sheet Data2",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "create",
+          "documentId": {
+            "__rl": true,
+            "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "title": "Data2",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          80,
+          160
+        ],
+        "id": "c55894a6-6488-4701-923e-08cd604f98ef",
+        "name": "Create sheet Data2",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "projectId": {
+            "__rl": true,
+            "value": "mango-erp-report",
+            "mode": "list",
+            "cachedResultName": "Mango ERP Report",
+            "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=mango-erp-report"
+          },
+          "sqlQuery": "SELECT\n  Company,\n  `Cust Name`,\n  `Ref Code`,\n  `Project Name`,\n  `Start Date`,\n  `End Date`,\n  `OF no`,\n  `Refdate_s`,\n  FORMAT(\"%' .2f\",`Total Othnetamt`) AS `Total Othnetamt`,\n  FORMAT(\"%' .2f\",`Total Paynetamt`) AS `Total Paynetamt`\nFROM `mango-erp-report.datamart.V_Advance_Report_Data2`  AS bbb\nWHERE bbb.`End Date` >= '2026-01-01'\nORDER BY bbb.`Cust name` ASC\n",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleBigQuery",
+        "typeVersion": 2.1,
+        "position": [
+          256,
+          160
+        ],
+        "id": "ec4e18fd-6abb-4660-8a5c-3b0963354fe2",
+        "name": "Execute a SQL_V_Advance_Report_Data2",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "projectId": {
+            "__rl": true,
+            "value": "mango-erp-report",
+            "mode": "list",
+            "cachedResultName": "Mango ERP Report",
+            "cachedResultUrl": "https://console.cloud.google.com/bigquery?project=mango-erp-report"
+          },
+          "sqlQuery": "SELECT \n  cust_name,\n  FORMAT(\"%' .2f\",total_clear_adv) AS total_clear_adv ,\n  FORMAT(\"%' .2f\",percentage_of_total) AS percentage_of_total\nFROM `mango-erp-report.datamart.V_Adv_Percent_Total`  AS ccc\nORDER BY ccc.cust_name ASC\nLIMIT 10000",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleBigQuery",
+        "typeVersion": 2.1,
+        "position": [
+          256,
+          352
+        ],
+        "id": "1924211a-f594-4956-84c2-916f43356914",
+        "name": "Execute a SQL_V_Adv_Percent_Total",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "remove",
+          "documentId": {
+            "__rl": true,
+            "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "%Onhand",
+            "mode": "name"
+          }
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          -96,
+          352
+        ],
+        "id": "920eaf97-03b0-44f7-9510-8b0d1008d1da",
+        "name": "Delete sheet %Onhand",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "appendOrUpdate",
+          "documentId": {
+            "__rl": true,
+            "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Data2",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "Company",
+                "displayName": "Company",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "cust_name",
+                "displayName": "cust_name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "refcode",
+                "displayName": "refcode",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "pre_des",
+                "displayName": "pre_des",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Start_Date",
+                "displayName": "Start_Date",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "End_Date",
+                "displayName": "End_Date",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "OF_no",
+                "displayName": "OF_no",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "refdate_s",
+                "displayName": "refdate_s",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "total_othnetamt",
+                "displayName": "total_othnetamt",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "total_paynetamt",
+                "displayName": "total_paynetamt",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          448,
+          160
+        ],
+        "id": "974140c2-5f93-4eb2-8998-3d11a8345435",
+        "name": "Append or update row in Data2",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "appendOrUpdate",
+          "documentId": {
+            "__rl": true,
+            "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "%Onhand",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          448,
+          352
+        ],
+        "id": "0e4cd7fe-6ce7-48c9-bbe4-269efe4be741",
+        "name": "Append or update row in %Onhand",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "create",
+          "documentId": {
+            "__rl": true,
+            "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "title": "%Onhand",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          80,
+          352
+        ],
+        "id": "20ace854-827f-426c-ba2f-9d85f4f0e5d1",
+        "name": "Create sheet %Onhand",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "numberInputs": 3
+        },
+        "type": "n8n-nodes-base.merge",
+        "typeVersion": 3.2,
+        "position": [
+          1120,
+          176
+        ],
+        "id": "a27bd879-f7e1-4c45-a058-1ca295b5eb84",
+        "name": "Merge"
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "appendOrUpdate",
+          "documentId": {
+            "__rl": true,
+            "value": "=10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "sheetName": {
+            "__rl": true,
+            "value": "Advance report daily",
+            "mode": "name"
+          },
+          "columns": {
+            "mappingMode": "autoMapInputData",
+            "value": {},
+            "matchingColumns": [],
+            "schema": [
+              {
+                "id": "company",
+                "displayName": "company",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "cust_name",
+                "displayName": "cust_name",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "refcode",
+                "displayName": "refcode",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "pre_des",
+                "displayName": "pre_des",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "BU",
+                "displayName": "BU",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Site Engineer",
+                "displayName": "Site Engineer",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Project Manager",
+                "displayName": "Project Manager",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Start Date",
+                "displayName": "Start Date",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "End Date",
+                "displayName": "End Date",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Due Date",
+                "displayName": "Due Date",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Overdue",
+                "displayName": "Overdue",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Advance",
+                "displayName": "Advance",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Clear Adv ในก้อนตั้งหนี้แล้ว",
+                "displayName": "Clear Adv ในก้อนตั้งหนี้แล้ว",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Clear Adv ในก้อนยังไม่ตั้งหนี้",
+                "displayName": "Clear Adv ในก้อนยังไม่ตั้งหนี้",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Clear Adv คงเหลือ",
+                "displayName": "Clear Adv คงเหลือ",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "ยอดคงเหลือตาม GL",
+                "displayName": "ยอดคงเหลือตาม GL",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Clear Adv เบิกเพิ่ม",
+                "displayName": "Clear Adv เบิกเพิ่ม",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Other เบิกเพิ่ม",
+                "displayName": "Other เบิกเพิ่ม",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Total เบิก",
+                "displayName": "Total เบิก",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Clear Adv คงเหลือ due date not yet",
+                "displayName": "Clear Adv คงเหลือ due date not yet",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Clear Adv คงเหลือ Over 1-5 Day",
+                "displayName": "Clear Adv คงเหลือ Over 1-5 Day",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Clear Adv คงเหลือ Over 6-10 Day",
+                "displayName": "Clear Adv คงเหลือ Over 6-10 Day",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Clear Adv คงเหลือ Over 11 Day",
+                "displayName": "Clear Adv คงเหลือ Over 11 Day",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              },
+              {
+                "id": "Check diff Clear Adv คงเหลือ - ยอดคงเหลือตาม GL",
+                "displayName": "Check diff Clear Adv คงเหลือ - ยอดคงเหลือตาม GL",
+                "required": false,
+                "defaultMatch": false,
+                "display": true,
+                "type": "string",
+                "canBeUsedToMatch": true,
+                "removed": false
+              }
+            ],
+            "attemptToConvertTypes": false,
+            "convertFieldsToString": false
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          448,
+          -16
+        ],
+        "id": "eff69aaa-3598-410b-8485-16e4d0d2b361",
+        "name": "Append or update row in sheet",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "authentication": "serviceAccount",
+          "operation": "create",
+          "documentId": {
+            "__rl": true,
+            "value": "10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80",
+            "mode": "id"
+          },
+          "title": "Advance report daily",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleSheets",
+        "typeVersion": 4.7,
+        "position": [
+          80,
+          -16
+        ],
+        "id": "ea7207af-5da7-4c31-8246-a6ece5758816",
+        "name": "Create sheet Advance report daily",
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80:batchUpdate",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleApi",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"requests\": [\n    {\n      \"repeatCell\": {\n        \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 0, \"endColumnIndex\": 29 },\n        \"cell\": { \n          \"userEnteredFormat\": { \n            \"textFormat\": { \"bold\": true },\n            \"verticalAlignment\": \"MIDDLE\",\n            \"horizontalAlignment\": \"CENTER\",\n            \"wrapStrategy\": \"WRAP\"\n          } \n        },\n        \"fields\": \"userEnteredFormat(textFormat,verticalAlignment,horizontalAlignment,wrapStrategy)\"\n      }\n    },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 0, \"endColumnIndex\": 7 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.74, \"green\": 0.74, \"blue\": 0.74 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 7, \"endColumnIndex\": 10 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.91, \"green\": 0.76, \"blue\": 0.63 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 10, \"endColumnIndex\": 13 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 1, \"green\": 0, \"blue\": 0 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 13, \"endColumnIndex\": 15 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 1, \"green\": 0.5, \"blue\": 0.1 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 15, \"endColumnIndex\": 16 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.95, \"green\": 0.76, \"blue\": 0.2 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 16, \"endColumnIndex\": 19 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.64, \"green\": 0.85, \"blue\": 0.97 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 19, \"endColumnIndex\": 20 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.29, \"green\": 0.53, \"blue\": 0.91 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 20, \"endColumnIndex\": 21 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 1, \"green\": 1, \"blue\": 0.26 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 21, \"endColumnIndex\": 23 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.84, \"green\": 0.65, \"blue\": 0.74 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 23, \"endColumnIndex\": 24 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 1, \"green\": 1, \"blue\": 0.26 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 24, \"endColumnIndex\": 25 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0, \"green\": 0, \"blue\": 0 }, \"textFormat\": { \"bold\": true, \"foregroundColor\": { \"red\": 1, \"green\": 1, \"blue\": 1 } } } }, \"fields\": \"userEnteredFormat(backgroundColor,textFormat)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 25, \"endColumnIndex\": 28 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.88, \"green\": 0.4, \"blue\": 0.4 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    { \"repeatCell\": { \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"startRowIndex\": 0, \"endRowIndex\": 1, \"startColumnIndex\": 28, \"endColumnIndex\": 29 }, \"cell\": { \"userEnteredFormat\": { \"backgroundColor\": { \"red\": 0.74, \"green\": 0.74, \"blue\": 0.74 } } }, \"fields\": \"userEnteredFormat(backgroundColor)\" } },\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"dimension\": \"COLUMNS\", \"startIndex\": 0, \"endIndex\": 11 }\n      }\n    },\n    {\n      \"updateDimensionProperties\": {\n        \"range\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"dimension\": \"COLUMNS\", \"startIndex\": 11, \"endIndex\": 29 },\n        \"properties\": { \"pixelSize\": 80 },\n        \"fields\": \"pixelSize\"\n      }\n    },\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": { \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }}, \"dimension\": \"ROWS\", \"startIndex\": 0, \"endIndex\": 1 }\n      }\n    },\n    {\n      \"setBasicFilter\": {\n        \"filter\": {\n          \"range\": {\n            \"sheetId\": {{ $(\"Create sheet Advance report daily\").first().json.sheetId }},\n            \"startRowIndex\": 0,\n            \"startColumnIndex\": 0,\n            \"endColumnIndex\": 29\n          }\n        }\n      }\n    }\n  ]\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          656,
+          -16
+        ],
+        "id": "754011c3-4e10-4dcb-bc67-c8cde962929e",
+        "name": "Set column color",
+        "executeOnce": true,
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80:batchUpdate",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleApi",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"requests\": [\n    {\n      \"repeatCell\": {\n        \"range\": {\n          \"sheetId\": {{ $(\"Create sheet Data2\").first().json.sheetId }},\n          \"startRowIndex\": 0,\n          \"endRowIndex\": 1,\n          \"startColumnIndex\": 0,\n          \"endColumnIndex\": 10\n        },\n        \"cell\": {\n          \"userEnteredFormat\": {\n            \"backgroundColor\": {\n              \"red\": 0.64,\n              \"green\": 0.85,\n              \"blue\": 0.97\n            },\n            \"textFormat\": {\n              \"bold\": true,\n              \"fontSize\": 10\n            },\n            \"verticalAlignment\": \"MIDDLE\",\n            \"horizontalAlignment\": \"LEFT\"\n          }\n        },\n        \"fields\": \"userEnteredFormat(backgroundColor,textFormat,verticalAlignment,horizontalAlignment)\"\n      }\n    },\n    {\n      \"setBasicFilter\": {\n        \"filter\": {\n          \"range\": {\n            \"sheetId\": {{ $(\"Create sheet Data2\").first().json.sheetId }},\n            \"startRowIndex\": 0,\n            \"startColumnIndex\": 0,\n            \"endColumnIndex\": 10\n          }\n        }\n      }\n    },\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": {\n          \"sheetId\": {{ $(\"Create sheet Data2\").first().json.sheetId }},\n          \"dimension\": \"COLUMNS\",\n          \"startIndex\": 0,\n          \"endIndex\": 10\n        }\n      }\n    }\n  ]\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          656,
+          160
+        ],
+        "id": "916ea1ea-9dc0-41ab-826b-bc3979ff6e37",
+        "name": "Set column color Sheet data2",
+        "executeOnce": true,
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "method": "POST",
+          "url": "https://sheets.googleapis.com/v4/spreadsheets/10MBCvI7wT9p8Jz9tQCS2BBoGS8zgjUiFAeh3o3dQX80:batchUpdate",
+          "authentication": "predefinedCredentialType",
+          "nodeCredentialType": "googleApi",
+          "sendBody": true,
+          "specifyBody": "json",
+          "jsonBody": "={\n  \"requests\": [\n    {\n      \"repeatCell\": {\n        \"range\": {\n          \"sheetId\": {{ $(\"Create sheet %Onhand\").first().json.sheetId }},\n          \"startRowIndex\": 0,\n          \"endRowIndex\": 1,\n          \"startColumnIndex\": 0,\n          \"endColumnIndex\": 3\n        },\n        \"cell\": {\n          \"userEnteredFormat\": {\n            \"backgroundColor\": {\n              \"red\": 0.64,\n              \"green\": 0.85,\n              \"blue\": 0.97\n            },\n            \"textFormat\": {\n              \"bold\": true,\n              \"fontSize\": 10\n            },\n            \"verticalAlignment\": \"MIDDLE\",\n            \"horizontalAlignment\": \"LEFT\"\n          }\n        },\n        \"fields\": \"userEnteredFormat(backgroundColor,textFormat,verticalAlignment,horizontalAlignment)\"\n      }\n    },\n    {\n      \"setBasicFilter\": {\n        \"filter\": {\n          \"range\": {\n            \"sheetId\": {{ $(\"Create sheet %Onhand\").first().json.sheetId }},\n            \"startRowIndex\": 0,\n            \"startColumnIndex\": 0,\n            \"endColumnIndex\": 3\n          }\n        }\n      }\n    },\n    {\n      \"autoResizeDimensions\": {\n        \"dimensions\": {\n          \"sheetId\": {{ $(\"Create sheet %Onhand\").first().json.sheetId }},\n          \"dimension\": \"COLUMNS\",\n          \"startIndex\": 0,\n          \"endIndex\": 3\n        }\n      }\n    }\n  ]\n}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4.3,
+        "position": [
+          656,
+          352
+        ],
+        "id": "b6431379-6a7e-4278-9fc3-507dd61682df",
+        "name": "Set column color % Onhand",
+        "executeOnce": true,
+        "credentials": {
+          "googleApi": {
+            "id": "ngHeKL8zwD5nwdFY",
+            "name": "Google Service Account - ERP"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "Schedule Trigger": {
+        "main": [
+          [
+            {
+              "node": "Delete sheet %Onhand",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Delete sheet Data2",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Delete sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute a SQL query": {
+        "main": [
+          [
+            {
+              "node": "Append or update row in sheet",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete sheet": {
+        "main": [
+          [
+            {
+              "node": "Create sheet Advance report daily",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Error Trigger": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete sheet Data2": {
+        "main": [
+          [
+            {
+              "node": "Create sheet Data2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create sheet Data2": {
+        "main": [
+          [
+            {
+              "node": "Execute a SQL_V_Advance_Report_Data2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute a SQL_V_Advance_Report_Data2": {
+        "main": [
+          [
+            {
+              "node": "Append or update row in Data2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Execute a SQL_V_Adv_Percent_Total": {
+        "main": [
+          [
+            {
+              "node": "Append or update row in %Onhand",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete sheet %Onhand": {
+        "main": [
+          [
+            {
+              "node": "Create sheet %Onhand",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Append or update row in Data2": {
+        "main": [
+          [
+            {
+              "node": "Set column color Sheet data2",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Append or update row in %Onhand": {
+        "main": [
+          [
+            {
+              "node": "Set column color % Onhand",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create sheet %Onhand": {
+        "main": [
+          [
+            {
+              "node": "Execute a SQL_V_Adv_Percent_Total",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Merge": {
+        "main": [
+          [
+            {
+              "node": "HTTP Request",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Append or update row in sheet": {
+        "main": [
+          [
+            {
+              "node": "Set column color",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create sheet Advance report daily": {
+        "main": [
+          [
+            {
+              "node": "Execute a SQL query",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set column color": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Set column color Sheet data2": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 1
+            }
+          ]
+        ]
+      },
+      "Set column color % Onhand": {
+        "main": [
+          [
+            {
+              "node": "Merge",
+              "type": "main",
+              "index": 2
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "TechAdmin Whiteline",
+    "name": "Version 4f89e11d",
+    "description": "add %ADV",
+    "autosaved": true
+  },
+  "tags": [
+    {
+      "updatedAt": "2026-01-27T04:30:20.308Z",
+      "createdAt": "2026-01-27T04:30:20.308Z",
+      "id": "4Let5txae3K8ihgD",
+      "name": "Advance Report"
+    },
+    {
+      "updatedAt": "2026-01-22T09:54:26.713Z",
+      "createdAt": "2026-01-22T09:54:26.713Z",
+      "id": "8QJtLXoZ0jelwIuw",
+      "name": "Finance"
+    }
+  ]
+}
